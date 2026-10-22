@@ -151,11 +151,14 @@ def memory_snapshot() -> dict:
     swap = re.search(r"used = ([\d.]+)M", run_command(["sysctl", "-n", "vm.swapusage"]))
     snapshot["swap_used_mb"] = float(swap.group(1)) if swap else None
     processes = []
+    home = str(Path.home())
     for line in run_command(["ps", "-axo", "pid=,rss=,args="]).splitlines():
         parts = line.split(None, 2)
         if len(parts) == 3 and "ollama" in parts[2].lower():
+            # Replace the home folder with ~ so result files contain no personal paths.
+            cmd = parts[2].replace(home, "~")[:80]
             processes.append(
-                {"pid": int(parts[0]), "rss_mb": round(int(parts[1]) / 1024), "cmd": parts[2][:80]}
+                {"pid": int(parts[0]), "rss_mb": round(int(parts[1]) / 1024), "cmd": cmd}
             )
     snapshot["ollama_processes"] = processes
     return snapshot
@@ -232,8 +235,21 @@ def thinking_behaviour(ollama: Ollama, model: str) -> list[dict]:
 
 
 def think_false_suppresses(rows: list[dict]) -> bool:
-    row = next(r for r in rows if r["think_param"] is False)
-    return not row["error"] and row["thinking_chars"] == 0 and not row["think_tags_in_content"]
+    """True only if think=false removes the reasoning, not merely the separate thinking field.
+
+    A model can stop returning a `thinking` field yet still write its reasoning into the
+    visible answer. So we also require the answer to be much shorter than the default
+    (thinking) answer to the same question.
+    """
+    off = next(r for r in rows if r["think_param"] is False)
+    default = next(r for r in rows if r["think_param"] == "omitted")
+    no_separate_thinking = (
+        not off["error"] and off["thinking_chars"] == 0 and not off["think_tags_in_content"]
+    )
+    short_answer = (off["generated_tokens"] or 0) <= max(
+        64, 0.5 * (default["generated_tokens"] or 0)
+    )
+    return no_separate_thinking and short_answer
 
 
 # ---------------------------------------------------------------------------
@@ -664,12 +680,16 @@ def score_case(case: dict, run: dict) -> dict:
             and not forbidden & set(called)
         )
         first = next((c for c in run["calls"] if c["name"] == expected[0]), None)
-        # Arguments only count as correct when the tool choice was also correct.
+        # Arguments only count as correct when the tool choice was also correct. They are
+        # compared after validation, so an omitted argument takes its documented default.
         args_ok = (
             tool_ok
             and first is not None
             and first["valid"]
-            and args_match(case.get("expect_args", {}), first["arguments"])
+            and args_match(
+                case.get("expect_args", {}),
+                TOOLS[first["name"]].model_validate(first["arguments"]).model_dump(),
+            )
         )
 
     grounded = None
@@ -681,18 +701,22 @@ def score_case(case: dict, run: dict) -> dict:
         "args_valid": all_valid,
         "args_correct": args_ok and not run["error"],
         "grounded": grounded,
+        "reasoning_in_answer": looks_like_reasoning(run["final_answer"]),
     }
 
 
-def tool_calling(ollama: Ollama, model: str, think: bool | None, label: str) -> dict:
-    results = []
-    for case in CASES:
-        print(f"    [{label}] {case['id']} ...", flush=True)
-        run = run_agent(ollama, model, think, case["question"])
-        results.append(
-            {"id": case["id"], "question": case["question"], **run, **score_case(case, run)}
-        )
+# Heuristic only: phrases that open or narrate step-by-step reasoning rather than an answer.
+REASONING_PATTERN = re.compile(
+    r"^(okay|ok,|alright|hmm|let me|let's see|so,|first,)|the user (asked|is asking|wants)",
+    re.IGNORECASE,
+)
 
+
+def looks_like_reasoning(answer: str) -> bool:
+    return bool(REASONING_PATTERN.search(answer.strip()))
+
+
+def summarise_tool_results(label: str, model: str, think: bool | None, results: list) -> dict:
     def rate(key: str) -> float:
         values = [r[key] for r in results if r[key] is not None]
         return round(sum(values) / len(values), 3) if values else 0.0
@@ -706,9 +730,42 @@ def tool_calling(ollama: Ollama, model: str, think: bool | None, label: str) -> 
         "args_correct_rate": rate("args_correct"),
         "args_valid_rate": rate("args_valid"),
         "grounded_rate": rate("grounded"),
+        "reasoning_in_answer_count": sum(r["reasoning_in_answer"] for r in results),
         "median_case_wall_s": statistics.median(r["wall_s"] for r in results),
+        "max_case_wall_s": max(r["wall_s"] for r in results),
         "total_thinking_chars": sum(r["thinking_chars"] for r in results),
     }
+
+
+def tool_calling(ollama: Ollama, model: str, think: bool | None, label: str) -> dict:
+    results = []
+    for case in CASES:
+        print(f"    [{label}] {case['id']} ...", flush=True)
+        run = run_agent(ollama, model, think, case["question"])
+        results.append(
+            {"id": case["id"], "question": case["question"], **run, **score_case(case, run)}
+        )
+    return summarise_tool_results(label, model, think, results)
+
+
+def rescore(data: dict) -> dict:
+    """Re-apply the current scoring rules to the raw responses saved in a results file."""
+    cases_by_id = {case["id"]: case for case in CASES}
+    data["think_false_suppresses"] = {
+        m: think_false_suppresses(rows) for m, rows in data["thinking"].items()
+    }
+    data["tool_calling"] = [
+        summarise_tool_results(
+            t["label"],
+            t["model"],
+            t["think"],
+            [{**c, **score_case(cases_by_id[c["id"]], c)} for c in t["cases"]],
+        )
+        for t in data["tool_calling"]
+    ]
+    data["pass_bar"] = evaluate_pass_bar(data)
+    data["rescored_at_utc"] = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
+    return data
 
 
 # ---------------------------------------------------------------------------
@@ -727,6 +784,7 @@ def markdown_report(data: dict) -> str:
         f"- Run at (UTC): {data['run_at_utc']}",
         f"- Machine: {data['machine']}",
         f"- Ollama version: {data['ollama_version']}",
+        f"- Re-scored from saved raw responses (UTC): {data.get('rescored_at_utc', 'no')}",
         "- Tool results in section 4 are **mock values**; they test model behaviour, "
         "not real sales figures.",
         "",
@@ -755,24 +813,32 @@ def markdown_report(data: dict) -> str:
                 f"{r['thinking_chars']} | {r['think_tags_in_content']} | "
                 f"{r['content'][:30]!r} | {r['answer_correct']} | {fmt(r['generated_tokens'])} |"
             )
+    lines += [
+        "",
+        "Suppressed means: no separate thinking field, no `<think>` tags, **and** an answer "
+        "at most half as long as the default answer (otherwise the reasoning has only moved "
+        "into the visible answer).",
+    ]
     for model, ok in data["think_false_suppresses"].items():
-        lines.append(f"\n`think: false` suppresses thinking on `{model}`: **{ok}**")
+        lines.append(f"\n`think: false` suppresses reasoning on `{model}`: **{ok}**")
 
     lines += ["", "## 3. Speed, memory and GPU", ""]
     lines += [
         "| Model | Context | Cold load (s) | Prompt tok/s | Generation tok/s | Loaded size | GPU | "
-        "Memory pressure after load | Swap used before → after (MB) |",
-        "|---|---|---|---|---|---|---|---|---|",
+        "Memory pressure before → after load → after runs | System free % (same points) | "
+        "Swap used before → after (MB) |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for s in data["speed"]:
-        before, after = s["memory_before"], s["memory_after_runs"]
+        snaps = [s["memory_before"], s["memory_after_load"], s["memory_after_runs"]]
         lines.append(
             f"| `{s['model']}` | {s['num_ctx']} | {s['cold_load_s']} | "
             f"{fmt(s['median_prompt_tokens_per_s'])} | "
             f"{fmt(s['median_generation_tokens_per_s'])} | "
             f"{s['loaded_size_gb']} GB | {fmt(s['gpu_percent'])}% | "
-            f"{s['memory_after_load'].get('pressure_level', 'n/a')} | "
-            f"{fmt(before.get('swap_used_mb'))} → {fmt(after.get('swap_used_mb'))} |"
+            f"{' → '.join(str(m.get('pressure_level', 'n/a')) for m in snaps)} | "
+            f"{' → '.join(fmt(m.get('system_free_percent')) for m in snaps)} | "
+            f"{fmt(snaps[0].get('swap_used_mb'))} → {fmt(snaps[2].get('swap_used_mb'))} |"
         )
     lines += ["", "Medians of the warm runs. `ollama ps` output captured after loading:", ""]
     for s in data["speed"]:
@@ -781,22 +847,30 @@ def markdown_report(data: dict) -> str:
     lines += ["", "## 4. Tool calling (16 scripted questions, mock tools)", ""]
     lines += [
         "| Configuration | Tool choice | Arguments correct | Arguments valid | Grounded number | "
-        "Median time per question (s) | Hidden thinking chars |",
-        "|---|---|---|---|---|---|---|",
+        "Median / max time per question (s) | Answers that narrate reasoning* | "
+        "Hidden thinking chars |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for t in data["tool_calling"]:
         lines.append(
             f"| {t['label']} | {t['tool_choice_accuracy']:.0%} | {t['args_correct_rate']:.0%} | "
-            f"{t['args_valid_rate']:.0%} | {t['grounded_rate']:.0%} | {t['median_case_wall_s']} | "
-            f"{t['total_thinking_chars']} |"
+            f"{t['args_valid_rate']:.0%} | {t['grounded_rate']:.0%} | "
+            f"{t['median_case_wall_s']} / {t['max_case_wall_s']} | "
+            f"{t['reasoning_in_answer_count']} of {len(t['cases'])} | {t['total_thinking_chars']} |"
         )
+    lines += [
+        "",
+        "\\* Heuristic: the visible answer opens with or narrates reasoning "
+        '("Okay, let me…", "The user asked…"). "Grounded number" is a single case '
+        "(`metric_net_revenue`), so it is a smoke test, not a rate.",
+    ]
     for t in data["tool_calling"]:
         lines += [
             "",
             f"### {t['label']}",
             "",
-            "| Case | Tools called | Choice | Args | Time (s) |",
-            "|---|---|---|---|---|",
+            "| Case | Tools called | Choice | Args | Reasoning in answer* | Time (s) |",
+            "|---|---|---|---|---|---|",
         ]
         for c in t["cases"]:
             called = (
@@ -807,7 +881,8 @@ def markdown_report(data: dict) -> str:
                 called += f" ERROR: {c['error'][:60]}"
             lines.append(
                 f"| {c['id']} | {called} | {'✓' if c['tool_choice_correct'] else '✗'} | "
-                f"{'✓' if c['args_correct'] else '✗'} | {c['wall_s']} |"
+                f"{'✓' if c['args_correct'] else '✗'} | "
+                f"{'yes' if c['reasoning_in_answer'] else 'no'} | {c['wall_s']} |"
             )
 
     lines += ["", "## 5. Against the proposed pass bar", ""]
@@ -870,7 +945,20 @@ def main() -> int:
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434")
     parser.add_argument("--runs", type=int, default=5, help="Warm speed runs per configuration")
     parser.add_argument("--skip-tools", action="store_true", help="Skip the tool-calling test")
+    parser.add_argument(
+        "--rescore",
+        type=Path,
+        metavar="RESULTS_JSON",
+        help="Re-score saved raw responses with the current rules instead of running models",
+    )
     args = parser.parse_args()
+
+    if args.rescore:
+        data = rescore(json.loads(args.rescore.read_text()))
+        args.rescore.write_text(json.dumps(data, indent=2, default=str))
+        args.rescore.with_suffix(".md").write_text(markdown_report(data))
+        print(f"Re-scored {args.rescore} and rewrote {args.rescore.with_suffix('.md')}")
+        return 0
 
     ollama = Ollama(args.ollama_url)
     try:
