@@ -181,6 +181,7 @@ The assistant is **not complete** until each of these is implemented **and verif
   - `uv run playwright install chromium` (only needed for screenshots and browser checks)
 - **Never copied between computers:** uploaded datasets live only on the computer where they were uploaded; re-upload them if needed.
 - **Local Git settings are per clone.** On a new clone, repeat the `git config --local` steps in [docs/setup-macos.md](docs/setup-macos.md).
+  - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
 After the user reviews Milestone 2: **Milestone 3 (forecasting)**. It starts with the required **forecasting feasibility review** (no implementation before approval):

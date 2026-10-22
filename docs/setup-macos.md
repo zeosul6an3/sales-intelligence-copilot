@@ -54,6 +54,11 @@ git config --local --add credential.https://github.com.helper '!gh auth git-cred
 ```
 Use `gh`'s full path in the last line if it is not on the PATH Git sees, e.g. `~/.local/bin/gh`.
 
+If a push fails with `RPC failed; HTTP 400` (large commits such as screenshots), raise the HTTP buffer for this repository only:
+```bash
+git config --local http.postBuffer 157286400
+```
+
 ## 6. Project dependencies
 ```bash
 uv sync                    # creates .venv with Python 3.13 and locked packages
