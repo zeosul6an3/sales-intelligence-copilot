@@ -5,8 +5,13 @@ description = "Local sales analytics dashboard with a trained forecasting model 
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "duckdb>=1.5.6,<2",
     "fastapi>=0.159",
     "httpx>=0.28",
+    "pandas>=3.0",
+    "pyarrow>=26",
+    "python-calamine>=0.9",
+    "python-multipart>=0.0.32",
     "uvicorn>=0.54",
 ]
 
@@ -15,6 +20,7 @@ sic = "sic.cli:main"
 
 [dependency-groups]
 dev = [
+    "playwright>=1.56",
     "pytest>=9.1",
     "ruff>=0.17",
 ]
