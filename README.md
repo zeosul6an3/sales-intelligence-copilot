@@ -18,7 +18,7 @@ A local sales analytics application: an interactive dashboard, a forecasting mod
 | API | Python 3.13, FastAPI, served on `127.0.0.1` only |
 | Data | pandas + DuckDB (one database file per dataset) |
 | Forecasting | scikit-learn |
-| Assistant | Ollama (local) running Qwen3 4B, with tool calling |
+| Assistant | Ollama (local) running Qwen3 4B Instruct (`qwen3:4b-instruct-2507-q4_K_M`), with tool calling |
 
 ## Run it (macOS)
 Prerequisites: uv, Node.js 24 LTS, Ollama. See [docs/setup-macos.md](docs/setup-macos.md) for verified install steps.

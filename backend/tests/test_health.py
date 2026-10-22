@@ -5,11 +5,12 @@ from sic.config import get_settings
 
 
 def test_default_settings_bind_to_localhost_only(monkeypatch):
-    for name in ("SIC_HOST", "SIC_PORT", "SIC_OLLAMA_URL"):
+    for name in ("SIC_HOST", "SIC_PORT", "SIC_OLLAMA_URL", "SIC_OLLAMA_MODEL"):
         monkeypatch.delenv(name, raising=False)
     settings = get_settings()
     assert settings.host == "127.0.0.1"
     assert settings.ollama_url == "http://127.0.0.1:11434"
+    assert settings.ollama_model == "qwen3:4b-instruct-2507-q4_K_M"
 
 
 def test_health_reports_ok_when_ollama_is_down(monkeypatch):
