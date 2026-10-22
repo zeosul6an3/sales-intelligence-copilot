@@ -1,13 +1,36 @@
 # Project status
 
-_Last updated: 2026-10-22 (end of Milestone 1)._
+_Last updated: 2026-10-22 (end of Milestone 2)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
-**Milestone 1 (environment, repository, local-model feasibility): complete on macOS, awaiting review.**
-Milestone 2 (data ingestion and dashboard) has **not** started.
+**Milestone 2 (data ingestion, dashboard, CSV upload): complete on macOS, awaiting review.**
+Milestone 3 (forecasting) has **not** started.
 
-## Completed
+## Completed: Milestone 2
+- **Data acquisition:** [scripts/download_data.py](scripts/download_data.py) downloads the official UCI zip and records checksums.
+  - zip `572e3627…7bfb`
+  - workbook `bcbe73b3…2df2e980`
+- **Inspection:** both sheets were inspected. The evidence is reproducible with [scripts/profile_raw_data.py](scripts/profile_raw_data.py), and the output is saved in [docs/data_profile_uci.md](docs/data_profile_uci.md).
+- **Cleaning pipeline:** [backend/sic/data/uci.py](backend/sic/data/uci.py), run with [scripts/prepare_data.py](scripts/prepare_data.py) in ~7 s.
+  - 1,067,371 rows read; 22,523 identical sheet-overlap rows removed after a null-safe comparison.
+  - 1,044,848 rows kept, each with exactly one line type; 0 unclassified; the counts reconcile.
+  - Rules, evidence and counts: [docs/data_cleaning.md](docs/data_cleaning.md). Columns: [docs/data_dictionary.md](docs/data_dictionary.md).
+- **Storage:** one folder and DuckDB file per dataset, opened read-only by the API. Dataset IDs are validated against a strict pattern ([backend/sic/data/storage.py](backend/sic/data/storage.py)).
+- **Metrics layer:** [backend/sic/metrics/](backend/sic/metrics/). Parametrised SQL provides KPIs, period comparison, weekly/monthly series with partial-period flags, product ranking and search, countries, and "other lines". Named periods (last complete month/week, etc.) are resolved in code.
+- **API:** dataset, metrics, quality, definitions and upload endpoints ([backend/sic/api/](backend/sic/api/)).
+- **Dashboard** (React + ECharts, light/dark):
+  - Overview: KPI tiles with comparison, trend chart with table view, top products, countries, other lines.
+  - Products: search, sort, per-product trend.
+  - Data quality: row flow, rules, flags, unusual lines, definitions.
+  - Datasets & upload.
+  - Screenshots: [docs/screenshots/](docs/screenshots/).
+- **CSV upload:**
+  - Downloadable template and automatic column-mapping suggestions.
+  - Validation with row-numbered examples: unreadable dates, non-numeric values, missing IDs, ambiguous or conflicting day/month order, mixed currency.
+  - 50-row preview; each upload is stored in its own folder; delete option.
+
+## Completed: Milestone 1
 - **Tools installed** by the user from official sources and verified on the Mac. Exact steps: [docs/setup-macos.md](docs/setup-macos.md).
   - uv 0.13.5
   - Node.js v24.22.1 LTS (npm 11.19.1)
@@ -28,6 +51,21 @@ Milestone 2 (data ingestion and dashboard) has **not** started.
 - **Memory check**: [scripts/memory_check.py](scripts/memory_check.py) (one model plus the running app), with results in [evaluation/memory/](evaluation/memory/2026-10-22_darwin-arm64.md).
 
 ## Checks performed (actual results)
+### Milestone 2
+| Check | Result |
+|---|---|
+| `uv run pytest` | **44 passed**, including the two real-data tests (not skipped) |
+| Metrics vs hand calculation | Synthetic dataset: KPIs, filters, weekly series (with empty and partial weeks), rankings and comparison all match hand-calculated values |
+| Metrics vs independent pandas (real UCI data) | Match for all data, Germany only, last complete month, previous complete month and last complete week |
+| Pinned UCI totals | Gross £19,700,954.46 · returns £719,692.94 · net £18,981,261.52 · 1,044,848 rows (tied to the file's SHA-256) |
+| Cleaning rules | One synthetic row per rule; a negative quantity at a non-zero price stays unclassified (not assumed a stock note); a changed overlap row stops the pipeline |
+| Dataset isolation | Two uploads + built-in: each returns only its own totals; the built-in file is byte-identical after uploads; malformed IDs (`../`, upper case, wrong length) rejected; deleting one upload leaves the others intact |
+| Upload validation | Bad dates, non-numeric values (decimal comma rejected, not guessed), missing IDs, thousands separators, date-order conflict, mixed/mismatched currency, empty and Windows-encoded files, formula/SQL-like text stored as plain data |
+| Browser upload journey (Playwright, [scripts/e2e_upload_check.py](scripts/e2e_upload_check.py)) | Pass: non-standard headers auto-mapped; 1 unreadable date reported (4 of 5 rows usable); import opens the new dataset with net revenue £45 (hand-calculated); delete leaves no files |
+| Dashboard review | Screenshots of all four pages in light and dark mode at 1280 px checked by eye; no page errors |
+| Memory with real dashboard data + instruct model loaded | Pressure **normal** (free 84% → 58%; app process 291 MB). Single run: [report](evaluation/memory/2026-10-22_darwin-arm64_m2-dashboard.md) |
+
+### Milestone 1
 | Check | Result |
 |---|---|
 | `uv run pytest` | 3 passed (health endpoint, Ollama-down handling, localhost defaults) |
@@ -47,7 +85,15 @@ Milestone 2 (data ingestion and dashboard) has **not** started.
 - Git identity and credentials are configured per repository only.
 - GitHub CLI was installed from the release's signed arm64 zip into `~/.local/bin`, because the universal `.pkg` was unsigned and Gatekeeper blocked it.
 - TypeScript 6 (as pinned by the official Vite template) instead of TypeScript 7.
-- DuckDB will be pinned below 2.0 (2.0.0 was released 2026-10-21) when it is added in Milestone 2.
+- DuckDB pinned below 2.0 (`>=1.5.6,<2`; 2.0.0 was released 2026-10-21). Installed: 1.5.6.
+- **Data decisions by the user (Milestone 2):**
+  - **Exact duplicates:** kept as genuine lines and flagged (11,812 copies, £54,228 net).
+  - **Manual (`M`) lines:** reported separately, not in product revenue.
+  - **Net revenue:** products only (product sales − product returns). Shipping, fees, discounts and adjustments are shown as "other lines".
+  - **Huge cancelled orders:** kept and flagged (|line value| ≥ £10,000 rule).
+- **Unusual-line rule:** |value| ≥ £10,000 for UCI (about 4× its 99.99th percentile). Uploads use the same relative rule.
+- **Previous period for comparisons:** whole calendar months compare with the preceding months; other ranges with the same number of days before them.
+- **Charts:** ECharts with the validated reference palette (single-series charts, table views, partial periods drawn lighter). Playwright (Python) for browser checks and screenshots.
 ### Default assistant model (decided by the user, 2026-10-22)
 **`qwen3:4b-instruct-2507-q4_K_M`**, the tested instruct (non-thinking) variant.
 
@@ -95,10 +141,20 @@ The assistant is **not complete** until each of these is implemented **and verif
 - **Memory pressure (open):**
   - **Benchmark:** after back-to-back model loads, with Chrome (~3.5 GB) and the Claude app (~1.8 GB) open, macOS reached "warning" pressure and swap grew from 0.5 to 2.3 GB.
   - **Retest:** one instruct model loaded, the app running and the dashboard open. Pressure stayed "normal" (one run, lighter background load).
-  - **To do:** retest with `scripts/memory_check.py` once the real dashboard (Milestone 2) and the assistant (Milestone 4) exist.
+  - **Retest with the real dashboard data (Milestone 2):** pressure "normal", free 84% → 58% (single run).
+  - **To do:** retest when the assistant exists (Milestone 4), with realistic agent prompts.
   - **Mitigations:** keep `num_ctx` at 8192, load only one model, unload when idle (`keep_alive`), close heavy browser tabs when demoing.
 
 ### Other known issues
+- **Bugs found by tests and fixed during Milestone 2:**
+  - An upload without the optional product-name column failed on import (an empty column was typed as a number).
+  - The upload check called ISO dates ambiguous, and "day first" would have misread them.
+  - A file could silently mix day/month orders (05/02 read as 2 May, 25/02 as 25 Feb); this is now reported as a conflict.
+  - Each bug has a test.
+- **Manual-adjustment effect:** the week of 6 June 2011 overstates product revenue by £38,970. A mispriced picnic-basket sale was reversed by a Manual credit, which sits outside product revenue by decision. The sale line is flagged as unusual.
+- **Not handled in uploads:** decimal commas such as `2,50` are rejected rather than guessed. Files over 50 MB or 2 million rows are rejected.
+- **Bundle size:** the dashboard's JavaScript bundle is 786 kB (mostly ECharts). Fine locally; Vite warns about it.
+- **Server restarts:** `uv run sic serve` does not reload code automatically. Restart it after pulling changes.
 - **Benchmark scoring bugs found and fixed after the run**, then re-scored from the saved raw responses (no results were re-run or edited by hand):
   - The `think=false` check looked only for a separate thinking field, so it missed reasoning written into the answer.
   - Omitted arguments were not given their documented defaults before comparison.
@@ -117,8 +173,18 @@ The assistant is **not complete** until each of these is implemented **and verif
 - **Before leaving a computer:** `git status` → `git diff` → `git add …` → `git commit` → `git push`.
 - **On arrival:** `git fetch` → `git status` → `git pull --ff-only`.
 - **Install separately on each machine** (not in Git): uv, Node.js LTS, gh (then `gh auth login`), Ollama and the Qwen models.
-- **Regenerate on each machine:** `uv sync`, `npm ci --prefix frontend`. Data and trained models (from Milestone 2 on) are regenerated with the scripts, not copied.
+- **Regenerate on each machine:**
+  - `uv sync`
+  - `npm ci --prefix frontend`
+  - `uv run python scripts/download_data.py`
+  - `uv run python scripts/prepare_data.py` (the pinned-totals test confirms the result matches)
+  - `uv run playwright install chromium` (only needed for screenshots and browser checks)
+- **Never copied between computers:** uploaded datasets live only on the computer where they were uploaded; re-upload them if needed.
 - **Local Git settings are per clone.** On a new clone, repeat the `git config --local` steps in [docs/setup-macos.md](docs/setup-macos.md).
 
 ## Next task
-After the user reviews Milestone 1: **Milestone 2**. That starts with downloading and inspecting both sheets of the UCI workbook, then proposing evidence-based transaction classification rules before building the pipeline and dashboard.
+After the user reviews Milestone 2: **Milestone 3 (forecasting)**. It starts with the required **forecasting feasibility review** (no implementation before approval):
+- usable training rows per series after lag construction, validation and holdout
+- which features and baselines are eligible
+- explicit window dates
+- resulting horizons

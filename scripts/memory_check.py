@@ -70,6 +70,7 @@ def main() -> int:
     parser.add_argument("--num-ctx", type=int, default=8192)
     parser.add_argument("--requests", type=int, default=5)
     parser.add_argument("--app-url", default=f"http://127.0.0.1:{settings.port}")
+    parser.add_argument("--label", default="", help="Suffix for the output file name")
     args = parser.parse_args()
 
     try:
@@ -101,6 +102,7 @@ def main() -> int:
         "run_at_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S"),
         "machine": machine_description(),
         "app_health": health,
+        "label": args.label,
         "model": args.model,
         "num_ctx": args.num_ctx,
         "models_loaded": [
@@ -123,6 +125,8 @@ def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     machine = data["machine"]
     stem = f"{datetime.now().strftime('%Y-%m-%d')}_{machine['os'].lower()}-{machine['arch']}"
+    if args.label:
+        stem += f"_{args.label}"
     (OUTPUT_DIR / f"{stem}.json").write_text(json.dumps(data, indent=2, default=str))
     (OUTPUT_DIR / f"{stem}.md").write_text(markdown_report(data))
     print(f"Wrote {OUTPUT_DIR / (stem + '.md')}")

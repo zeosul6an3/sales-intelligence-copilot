@@ -1,0 +1,174 @@
+{
+  "run_at_utc": "2026-10-22 18:38:46",
+  "machine": {
+    "os": "Darwin",
+    "os_version": "26.6.2",
+    "arch": "arm64",
+    "python": "3.13.17",
+    "chip": "Apple M3",
+    "memory_gb": 16.0
+  },
+  "app_health": {
+    "status": "ok",
+    "app_version": "0.1.0",
+    "ollama": {
+      "reachable": true,
+      "version": "0.40.8"
+    }
+  },
+  "label": "m2-dashboard",
+  "model": "qwen3:4b-instruct-2507-q4_K_M",
+  "num_ctx": 8192,
+  "models_loaded": [
+    {
+      "name": "qwen3:4b-instruct-2507-q4_K_M",
+      "size_gb": 3.88,
+      "gpu_percent": 100,
+      "context_length": 8192
+    }
+  ],
+  "ollama_ps": "NAME                             ID              SIZE      PROCESSOR    CONTEXT    RUNNER      UNTIL              \nqwen3:4b-instruct-2507-q4_K_M    0edcdef34593    3.9 GB    100% GPU     8192       llamacpp    4 minutes from now",
+  "baseline": {
+    "pressure_level": "normal",
+    "system_free_percent": 84,
+    "swap_used_mb": 2314.31,
+    "ollama_processes": [
+      {
+        "pid": 95206,
+        "rss_mb": 58,
+        "cmd": "/Applications/Ollama.app/Contents/MacOS/Ollama hidden"
+      },
+      {
+        "pid": 95211,
+        "rss_mb": 30,
+        "cmd": "/Applications/Ollama.app/Contents/Resources/ollama serve"
+      }
+    ]
+  },
+  "baseline_top_apps": [
+    {
+      "app": "Google Chrome.app",
+      "rss_mb": 2163
+    },
+    {
+      "app": "Claude.app",
+      "rss_mb": 2007
+    },
+    {
+      "app": "claude.app",
+      "rss_mb": 473
+    },
+    {
+      "app": "Dropbox.app",
+      "rss_mb": 463
+    },
+    {
+      "app": "python",
+      "rss_mb": 402
+    },
+    {
+      "app": "Finder.app",
+      "rss_mb": 128
+    }
+  ],
+  "after_requests": {
+    "pressure_level": "normal",
+    "system_free_percent": 58,
+    "swap_used_mb": 2266.25,
+    "ollama_processes": [
+      {
+        "pid": 95206,
+        "rss_mb": 56,
+        "cmd": "/Applications/Ollama.app/Contents/MacOS/Ollama hidden"
+      },
+      {
+        "pid": 95211,
+        "rss_mb": 31,
+        "cmd": "/Applications/Ollama.app/Contents/Resources/ollama serve"
+      },
+      {
+        "pid": 99605,
+        "rss_mb": 5316,
+        "cmd": "/Applications/Ollama.app/Contents/Resources/llama-server --model ~/.ollama/model"
+      }
+    ]
+  },
+  "after_top_apps": [
+    {
+      "app": "Ollama.app",
+      "rss_mb": 5402
+    },
+    {
+      "app": "Google Chrome.app",
+      "rss_mb": 2013
+    },
+    {
+      "app": "Claude.app",
+      "rss_mb": 1751
+    },
+    {
+      "app": "Dropbox.app",
+      "rss_mb": 461
+    },
+    {
+      "app": "claude.app",
+      "rss_mb": 339
+    },
+    {
+      "app": "python",
+      "rss_mb": 291
+    }
+  ],
+  "runs": [
+    {
+      "wall_s": 16.89,
+      "load_s": 1.05,
+      "prompt_tokens": 2591,
+      "prompt_tokens_per_s": 317.0,
+      "generated_tokens": 217,
+      "generation_tokens_per_s": 28.3,
+      "total_s": 16.89,
+      "done_reason": "stop"
+    },
+    {
+      "wall_s": 15.95,
+      "load_s": 0.0,
+      "prompt_tokens": 2591,
+      "prompt_tokens_per_s": 316.8,
+      "generated_tokens": 218,
+      "generation_tokens_per_s": 28.2,
+      "total_s": 15.95,
+      "done_reason": "stop"
+    },
+    {
+      "wall_s": 15.62,
+      "load_s": 0.0,
+      "prompt_tokens": 2591,
+      "prompt_tokens_per_s": 316.6,
+      "generated_tokens": 202,
+      "generation_tokens_per_s": 27.3,
+      "total_s": 15.62,
+      "done_reason": "stop"
+    },
+    {
+      "wall_s": 16.6,
+      "load_s": 0.0,
+      "prompt_tokens": 2591,
+      "prompt_tokens_per_s": 312.1,
+      "generated_tokens": 234,
+      "generation_tokens_per_s": 28.4,
+      "total_s": 16.6,
+      "done_reason": "stop"
+    },
+    {
+      "wall_s": 16.46,
+      "load_s": 0.0,
+      "prompt_tokens": 2591,
+      "prompt_tokens_per_s": 312.6,
+      "generated_tokens": 231,
+      "generation_tokens_per_s": 28.5,
+      "total_s": 16.46,
+      "done_reason": "stop"
+    }
+  ]
+}
