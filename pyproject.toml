@@ -1,0 +1,41 @@
+[project]
+name = "sales-intelligence-copilot"
+version = "0.1.0"
+description = "Local sales analytics dashboard with a trained forecasting model and a tool-using AI assistant."
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi>=0.159",
+    "httpx>=0.28",
+    "uvicorn>=0.54",
+]
+
+[project.scripts]
+sic = "sic.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1",
+    "ruff>=0.17",
+]
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "sic"
+module-root = "backend"
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["sic"]
