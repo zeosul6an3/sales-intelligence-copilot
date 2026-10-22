@@ -1,0 +1,104 @@
+/* Design tokens: every colour is defined once here, with a light and a dark
+   value. Components use only these variables, so the whole dashboard follows
+   the operating system's light/dark setting. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #e2e5ea;
+  --text: #1c2430;
+  --text-muted: #5b6676;
+  --accent: #2563eb;
+  --ok: #15803d;
+  --bad: #b91c1c;
+  --radius: 10px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f141b;
+    --surface: #171e27;
+    --border: #2a3441;
+    --text: #e6eaf0;
+    --text-muted: #9aa5b4;
+    --accent: #60a5fa;
+    --ok: #4ade80;
+    --bad: #f87171;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+}
+
+.subtitle {
+  margin: 4px 0 24px;
+  color: var(--text-muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.status-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: 12px 80px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-label {
+  font-weight: 600;
+}
+
+.status-detail {
+  color: var(--text-muted);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot-ok {
+  background: var(--ok);
+}
+
+.dot-bad {
+  background: var(--bad);
+}
