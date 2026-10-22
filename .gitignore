@@ -1,0 +1,41 @@
+# --- Python environments and caches (recreate with `uv sync`) ---
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- Node / frontend (recreate with `npm ci` and `npm run build`) ---
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# --- Data: downloaded, generated, or uploaded (recreate with scripts/) ---
+data/raw/
+data/processed/
+data/uploads/
+
+# --- Trained models and other runtime outputs (regenerate with scripts/) ---
+artifacts/
+*.joblib
+*.duckdb
+*.duckdb.wal
+
+# --- Secrets and local settings ---
+.env
+.env.*
+!.env.example
+
+# --- Personal Claude Code settings for this machine ---
+.claude/settings.local.json
+
+# --- Logs and OS / editor clutter ---
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/

@@ -1,0 +1,16 @@
+# Store text files with LF line endings in the repository so the Mac and the
+# Windows PC produce identical diffs. Windows-only scripts keep CRLF.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never touch line endings or try to diff them.
+*.png binary
+*.jpg binary
+*.ico binary
+*.xlsx binary
+*.zip binary
+*.parquet binary
+*.duckdb binary
+*.joblib binary
