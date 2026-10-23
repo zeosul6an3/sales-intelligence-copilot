@@ -1,11 +1,21 @@
 # Project status
 
-_Last updated: 2026-10-22 (end of Milestone 2)._
+_Last updated: 2026-10-24 (Milestone 3 feasibility review, awaiting approval)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
-**Milestone 2 (data ingestion, dashboard, CSV upload): complete on macOS, awaiting review.**
-Milestone 3 (forecasting) has **not** started.
+**Milestone 3 (forecasting): feasibility review done; no model trained.** Waiting for the user's decisions and approval before implementing training.
+Milestone 2 is complete on macOS.
+
+## Milestone 3 so far
+- **Feasibility review:** [docs/forecasting_feasibility_review.md](docs/forecasting_feasibility_review.md). Reproducible with [scripts/forecast_feasibility.py](scripts/forecast_feasibility.py), which writes [evaluation/forecast_feasibility/review.json](evaluation/forecast_feasibility/review.json) and asserts the window dates.
+- **Key findings:**
+  - **Weeks:** 104 complete weeks (7 Dec 2009 → 4 Dec 2011). Two weeks have no records of any kind (the Christmas closures, weeks 4 and 56). No missing data was detected: every non-trading weekday matches a UK public holiday or the Christmas closure.
+  - **Proposed windows:** product selection weeks 1–60; validation targets 61–80 (31 Jan–19 Jun 2011); calibration targets 81–92 (20 Jun–11 Sep 2011); final holdout 93–104 (12 Sep–4 Dec 2011).
+  - **Training rows per series:** 52 → 84 with short lags; only 8 → 40 with a 52-week lag. So 52-week information comes from the seasonal-naive baseline, plus one pooled experiment.
+  - **Top 20 products,** selected on weeks 1–60 only: 834 of 4,046 products are eligible; the top 20 cover 9.7% of net product revenue.
+  - **Picnic-basket case:** quantity 60 was keyed for one £649.50 pack; the £38,970 reversal was booked as a Manual credit, not a product return. It inflates week 79 (in validation) by 18.4%, and lifts product 22502 to #9 in the dashboard's last-12-months top 10 (#158 without it). It is the only large exact match.
+- **Wording fix:** every dashboard label now says **"Net product revenue"** (10 places plus the metric definition). The calculation is unchanged; the API field is still `net_revenue`.
 
 ## Completed: Milestone 2
 - **Data acquisition:** [scripts/download_data.py](scripts/download_data.py) downloads the official UCI zip and records checksums.
@@ -51,6 +61,12 @@ Milestone 3 (forecasting) has **not** started.
 - **Memory check**: [scripts/memory_check.py](scripts/memory_check.py) (one model plus the running app), with results in [evaluation/memory/](evaluation/memory/2026-10-22_darwin-arm64.md).
 
 ## Checks performed (actual results)
+### Milestone 3 (review stage)
+| Check | Result |
+|---|---|
+| Window assertions in `forecast_feasibility.py` | Pass: selection before validation; segments disjoint; calibration ends before holdout; holdout ≥ horizon |
+| After the label change | `uv run pytest` 44 passed; browser upload check passed (tile labelled "Net product revenue" shows £45); screenshots retaken |
+
 ### Milestone 2
 | Check | Result |
 |---|---|
@@ -128,7 +144,15 @@ The assistant is **not complete** until each of these is implemented **and verif
 - Validation and grounding checks reduce errors but **do not guarantee correctness**. The reports must say so.
 
 ## Pending decisions (need the user)
-1. **Code licence**: to be discussed separately.
+1. **Picnic-basket treatment for the forecasting target:**
+   - **A (recommended):** a documented correction rule applied to the forecasting series only.
+   - **B:** no correction.
+   - **C:** exclude week 79 from validation scoring.
+   - The revenue policy stays unchanged either way.
+2. **Dashboard annotation** for product 22502 and the week of 6 June 2011 (recommended); no policy change.
+3. **Closure weeks:** keep them as zeros and add a calendar trading-days feature (recommended).
+4. **First forecasting scope:** total + top 20 products (recommended), or the total only.
+5. **Code licence:** to be discussed separately.
 
 ## Known issues and limitations
 ### Open issues (must stay open until verified fixed)
@@ -151,7 +175,7 @@ The assistant is **not complete** until each of these is implemented **and verif
   - The upload check called ISO dates ambiguous, and "day first" would have misread them.
   - A file could silently mix day/month orders (05/02 read as 2 May, 25/02 as 25 Feb); this is now reported as a conflict.
   - Each bug has a test.
-- **Manual-adjustment effect:** the week of 6 June 2011 overstates product revenue by £38,970. A mispriced picnic-basket sale was reversed by a Manual credit, which sits outside product revenue by decision. The sale line is flagged as unusual.
+- **Manual-adjustment effect:** the week of 6 June 2011 overstates net product revenue by £38,970. A sale keyed as 60 packs instead of 1 was reversed by a Manual credit, which sits outside product revenue by decision. It also puts PICNIC BASKET WICKER SMALL (22502) at #9 in the dashboard's last-12-months top 10 (#158 without it). Full analysis in the feasibility review; treatment awaits decision 1.
 - **Not handled in uploads:** decimal commas such as `2,50` are rejected rather than guessed. Files over 50 MB or 2 million rows are rejected.
 - **Bundle size:** the dashboard's JavaScript bundle is 786 kB (mostly ECharts). Fine locally; Vite warns about it.
 - **Server restarts:** `uv run sic serve` does not reload code automatically. Restart it after pulling changes.
@@ -184,8 +208,8 @@ The assistant is **not complete** until each of these is implemented **and verif
   - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
-After the user reviews Milestone 2: **Milestone 3 (forecasting)**. It starts with the required **forecasting feasibility review** (no implementation before approval):
-- usable training rows per series after lag construction, validation and holdout
-- which features and baselines are eligible
-- explicit window dates
-- resulting horizons
+Once the user has decided items 1–4 above and approved the review, implement the Milestone 3 training pipeline:
+- baselines and pooled ML models
+- rolling-origin validation, calibration and holdout evaluation
+- leakage tests
+- model card with metrics, forecast page and background training job

@@ -1,0 +1,334 @@
+{
+  "complete_weeks": {
+    "count": 104,
+    "first": "2009-12-07 \u2013 2009-12-13",
+    "last": "2011-11-28 \u2013 2011-12-04",
+    "excluded_partial": [
+      "2009-11-30 week (data starts 2009-12-01)",
+      "2011-12-05 week (data ends 2011-12-09)"
+    ],
+    "closure_weeks": [
+      {
+        "week": 4,
+        "start": "2009-12-28",
+        "lines": 0,
+        "net": 0.0,
+        "days": 0
+      },
+      {
+        "week": 56,
+        "start": "2010-12-27",
+        "lines": 0,
+        "net": 0.0,
+        "days": 0
+      }
+    ],
+    "short_weeks": [
+      {
+        "week": 3,
+        "start": "2009-12-21",
+        "lines": 3238,
+        "net": 49894.6,
+        "days": 3
+      }
+    ]
+  },
+  "segments": {
+    "selection (product ranking)": {
+      "weeks": "1\u201360",
+      "n_weeks": 60,
+      "from": "2009-12-07",
+      "to": "2011-01-30"
+    },
+    "validation targets (model selection)": {
+      "weeks": "61\u201380",
+      "n_weeks": 20,
+      "from": "2011-01-31",
+      "to": "2011-06-19"
+    },
+    "calibration targets (intervals)": {
+      "weeks": "81\u201392",
+      "n_weeks": 12,
+      "from": "2011-06-20",
+      "to": "2011-09-11"
+    },
+    "final holdout targets": {
+      "weeks": "93\u2013104",
+      "n_weeks": 12,
+      "from": "2011-09-12",
+      "to": "2011-12-04"
+    }
+  },
+  "first_trainable_target": {
+    "short_lags": {
+      "week": 9,
+      "start": "2010-02-01"
+    },
+    "with_lag_52": {
+      "week": 53,
+      "start": "2010-12-06"
+    }
+  },
+  "training_rows": [
+    {
+      "origin": "first validation origin",
+      "week": 61,
+      "origin_date": "2011-01-31",
+      "short_lags_per_series": 52,
+      "lag52_per_series": 8,
+      "short_lags_pooled_21": 1092,
+      "lag52_pooled_21": 168
+    },
+    {
+      "origin": "first calibration origin",
+      "week": 81,
+      "origin_date": "2011-06-20",
+      "short_lags_per_series": 72,
+      "lag52_per_series": 28,
+      "short_lags_pooled_21": 1512,
+      "lag52_pooled_21": 588
+    },
+    {
+      "origin": "holdout origin",
+      "week": 93,
+      "origin_date": "2011-09-12",
+      "short_lags_per_series": 84,
+      "lag52_per_series": 40,
+      "short_lags_pooled_21": 1764,
+      "lag52_pooled_21": 840
+    },
+    {
+      "origin": "final refit (future forecast)",
+      "week": 105,
+      "origin_date": "2011-12-05",
+      "short_lags_per_series": 96,
+      "lag52_per_series": 52,
+      "short_lags_pooled_21": 2016,
+      "lag52_pooled_21": 1092
+    }
+  ],
+  "evaluation_points_per_series": {
+    "validation": {
+      "h1": 20,
+      "h4": 17,
+      "h8": 13
+    },
+    "calibration": {
+      "h1": 12,
+      "h4": 9,
+      "h8": 5
+    },
+    "holdout": {
+      "h1": 12,
+      "h4": 9,
+      "h8": 5
+    }
+  },
+  "products": {
+    "products_with_net_sales_in_selection": 4046,
+    "trading_weeks_in_selection": 58,
+    "eligible": 834,
+    "rule": "net sales in >= 75% of trading weeks of the selection window and sold in its first week; top 20 by selection-window net",
+    "selected": [
+      {
+        "rank": 1,
+        "product_id": "85123A",
+        "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+        "selection_net": 172360.73,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 2,
+        "product_id": "85099B",
+        "name": "JUMBO BAG RED RETROSPOT",
+        "selection_net": 95031.39,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 3,
+        "product_id": "84879",
+        "name": "ASSORTED COLOUR BIRD ORNAMENT",
+        "selection_net": 73151.63,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 4,
+        "product_id": "22086",
+        "name": "PAPER CHAIN KIT 50'S CHRISTMAS",
+        "selection_net": 56374.64,
+        "active_weeks_selection": 46,
+        "active_weeks_validation": 11,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 5,
+        "product_id": "47566",
+        "name": "PARTY BUNTING",
+        "selection_net": 52033.69,
+        "active_weeks_selection": 57,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 6,
+        "product_id": "21843",
+        "name": "RED RETROSPOT CAKE STAND",
+        "selection_net": 43112.37,
+        "active_weeks_selection": 57,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 7,
+        "product_id": "20685",
+        "name": "DOORMAT RED RETROSPOT",
+        "selection_net": 42455.48,
+        "active_weeks_selection": 57,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 8,
+        "product_id": "21621",
+        "name": "VINTAGE UNION JACK BUNTING",
+        "selection_net": 39382.18,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 18,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 9,
+        "product_id": "85099F",
+        "name": "JUMBO BAG STRAWBERRY",
+        "selection_net": 39285.01,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 19,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 10,
+        "product_id": "79321",
+        "name": "CHILLI LIGHTS",
+        "selection_net": 38987.59,
+        "active_weeks_selection": 50,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 11,
+        "product_id": "20725",
+        "name": "LUNCH BAG RED RETROSPOT",
+        "selection_net": 37843.51,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 12,
+        "product_id": "20914",
+        "name": "SET/5 RED RETROSPOT LID GLASS BOWLS",
+        "selection_net": 35915.81,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 13,
+        "product_id": "15056N",
+        "name": "EDWARDIAN PARASOL NATURAL",
+        "selection_net": 35249.52,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 14,
+        "product_id": "21931",
+        "name": "JUMBO STORAGE BAG SUKI",
+        "selection_net": 34037.82,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 15,
+        "product_id": "21232",
+        "name": "STRAWBERRY CERAMIC TRINKET BOX",
+        "selection_net": 34018.48,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 16,
+        "product_id": "21212",
+        "name": "PACK OF 72 RETROSPOT CAKE CASES",
+        "selection_net": 33694.82,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 17,
+        "product_id": "85099C",
+        "name": "JUMBO  BAG BAROQUE BLACK WHITE",
+        "selection_net": 33623.4,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 18,
+        "product_id": "21754",
+        "name": "HOME BUILDING BLOCK WORD",
+        "selection_net": 32553.06,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 19,
+        "product_id": "22114",
+        "name": "HOT WATER BOTTLE TEA AND SYMPATHY",
+        "selection_net": 32179.33,
+        "active_weeks_selection": 55,
+        "active_weeks_validation": 4,
+        "active_weeks_holdout": 12
+      },
+      {
+        "rank": 20,
+        "product_id": "22112",
+        "name": "CHOCOLATE HOT WATER BOTTLE",
+        "selection_net": 32066.71,
+        "active_weeks_selection": 58,
+        "active_weeks_validation": 20,
+        "active_weeks_holdout": 12
+      }
+    ],
+    "selected_share_of_selection_net": 0.0969
+  },
+  "reversal_effects": [
+    {
+      "credit_invoice": "C556445",
+      "sale_invoice": "556444",
+      "product_id": "22502",
+      "value": 38970.0,
+      "week": 79,
+      "week_start": "2011-06-06",
+      "segment": "validation targets (model selection)",
+      "total_week_net_as_reported": 212228.43,
+      "total_week_net_if_reversal_applied": 173258.43,
+      "share_of_total_week": 0.1836,
+      "product_week_net_as_reported": 39981.52,
+      "product_week_net_if_reversal_applied": 1011.52,
+      "product_selected": false
+    }
+  ],
+  "unmatched_large_manual_credits_note": "Other large Manual credits have no exactly matching product sale within 30 minutes; most pair with a Manual charge of the same amount and never touch product revenue."
+}
