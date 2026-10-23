@@ -116,13 +116,13 @@ These apply everywhere: dashboard, assistant (Milestone 4) and reports.
 |---|---|
 | Gross sales | Σ quantity × unit price over product-sale lines |
 | Returns | Value of product-return lines, shown as a positive amount |
-| Net revenue | Gross sales − returns (**products only**; **owner decision**) |
+| Net product revenue | Gross sales − returns (**products only**; **owner decision**) |
 | Orders | Distinct invoices with at least one product-sale line |
 | Units sold | Σ quantity over product-sale lines |
 | Average order value | Gross sales ÷ orders |
 | Identified customers | Distinct customer IDs on product-sale lines |
 
-- **Reported separately, never mixed into net revenue:** shipping, fees and commission, discounts, manual adjustments, samples, gift vouchers, test lines, bad-debt adjustments.
+- **Reported separately, never mixed into net product revenue:** shipping, fees and commission, discounts, manual adjustments, samples, gift vouchers, test lines, bad-debt adjustments.
 - **Not available:** profit, margin and stock availability. The data has no cost or inventory information.
 
 ## 4. Uploaded CSVs

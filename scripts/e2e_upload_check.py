@@ -22,7 +22,7 @@ CSV = """Order No,Order Date,SKU,Item,Qty,Price,Client,Country
 5003,not a date,MUG-1,Blue mug,1,4.50,K2,France
 R5004,2024-03-08,TOWEL-2,Tea towel,-2,2.25,K1,United Kingdom
 """
-# Net revenue = 18 + 22.50 + 9 - 4.50 = £45.00 (the undated row is excluded)
+# Net product revenue = 18 + 22.50 + 9 - 4.50 = £45.00 (the undated row is excluded)
 EXPECTED_NET = "£45"
 
 
@@ -56,9 +56,9 @@ def main() -> int:
 
         page.get_by_role("button", name="Import dataset").click()
         expect(page.get_by_role("tab", name="Overview")).to_have_attribute("aria-selected", "true")
-        net_tile = page.locator(".kpi").filter(has_text="Net revenue").locator(".kpi-value")
+        net_tile = page.locator(".kpi").filter(has_text="Net product revenue").locator(".kpi-value")
         expect(net_tile).to_have_text(EXPECTED_NET)
-        print(f"imported and opened: net revenue tile shows {EXPECTED_NET}: OK")
+        print(f"imported and opened: net product revenue tile shows {EXPECTED_NET}: OK")
 
         page.get_by_role("tab", name="Datasets & upload").click()
         page.get_by_role("button", name="Delete").click()

@@ -13,10 +13,10 @@ A local sales analytics application: an interactive dashboard, a forecasting mod
   - Products: searchable and sortable product table, with a trend chart for each product.
   - Data quality: every cleaning rule with row counts, values and evidence.
   - Datasets & upload: upload your own sales CSV through a template, column mapping, validation messages and a preview. Each upload is stored separately.
-- **Definitions** used everywhere: net revenue = product sales − product returns. Shipping, fees, discounts and adjustments are reported separately. Profit and stock are not available in this data, and the app says so.
+- **Definitions** used everywhere: **net product revenue** = product sales − product returns. Shipping, fees, discounts and adjustments are reported separately. Profit and stock are not available in this data, and the app says so.
 
 ## Planned
-- Weekly net-revenue forecasting that compares simple baselines with machine-learning models using time-based backtests (Milestone 3).
+- Weekly net-product-revenue forecasting that compares simple baselines with machine-learning models using time-based backtests (Milestone 3).
 - A tool-using assistant powered by **Qwen3 4B Instruct running locally in Ollama** (`qwen3:4b-instruct-2507-q4_K_M`). The model chooses tools and the application code does every calculation (Milestone 4).
 
 ## Architecture

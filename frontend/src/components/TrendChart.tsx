@@ -5,7 +5,7 @@ import Chart, { type Tokens } from './Chart'
 
 type Metric = 'net_revenue' | 'gross_sales' | 'returns' | 'orders'
 const METRIC_LABELS: Record<Metric, string> = {
-  net_revenue: 'Net revenue',
+  net_revenue: 'Net product revenue',
   gross_sales: 'Gross sales',
   returns: 'Returns',
   orders: 'Orders',
@@ -123,7 +123,7 @@ export default function TrendChart({ points, freq, currency, onFreqChange, title
             <thead>
               <tr>
                 <th>Period</th>
-                <th className="num">Net revenue</th>
+                <th className="num">Net product revenue</th>
                 <th className="num">Gross sales</th>
                 <th className="num">Returns</th>
                 <th className="num">Orders</th>

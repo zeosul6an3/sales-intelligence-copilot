@@ -103,7 +103,7 @@ def summary(con: duckdb.DuckDBPyConnection, filters: Filters) -> dict:
 
 
 def timeseries(con: duckdb.DuckDBPyConnection, filters: Filters, freq: str) -> list[dict]:
-    """Net revenue, gross sales, returns and orders per week or month.
+    """Net product revenue, gross sales, returns and orders per week or month.
 
     Empty periods (e.g. Christmas closures) appear with zeros. A period is marked
     partial if it is cut off by the filter range or by the data's coverage.

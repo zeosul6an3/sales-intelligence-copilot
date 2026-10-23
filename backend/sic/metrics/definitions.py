@@ -13,7 +13,7 @@ METRICS = {
         ),
     },
     "net_revenue": {
-        "label": "Net revenue",
+        "label": "Net product revenue",
         "definition": (
             "Gross sales minus returns, for products only. Shipping, discounts, fees, "
             "manual adjustments, samples, gift vouchers and bad-debt entries are reported "

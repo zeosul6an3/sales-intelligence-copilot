@@ -10,7 +10,7 @@ type Tile = {
 }
 
 const TILES: Tile[] = [
-  { key: 'net_revenue', label: 'Net revenue', kind: 'money', upIsGood: true },
+  { key: 'net_revenue', label: 'Net product revenue', kind: 'money', upIsGood: true },
   { key: 'gross_sales', label: 'Gross sales', kind: 'money', upIsGood: true },
   { key: 'returns', label: 'Returns', kind: 'money', upIsGood: false },
   { key: 'orders', label: 'Orders', kind: 'count', upIsGood: true },

@@ -40,14 +40,14 @@ export default function Overview({ datasetId, query, currency, onOpenProduct }: 
       <div className="grid grid-2">
         <section className={`card ${products.loading ? 'loading' : ''}`}>
           <div className="card-header">
-            <h2>Top 10 products by net revenue</h2>
+            <h2>Top 10 products by net product revenue</h2>
           </div>
           <p className="card-sub">Click a bar to open the product.</p>
           {products.data && products.data.products.length > 0 ? (
             <HBarChart
               rows={products.data.products.map((p) => ({ label: p.product_name, value: p.net_revenue }))}
               currency={currency}
-              ariaLabel="Top 10 products by net revenue"
+              ariaLabel="Top 10 products by net product revenue"
               onSelect={(i) => onOpenProduct(products.data!.products[i].product_id)}
             />
           ) : (
@@ -57,14 +57,14 @@ export default function Overview({ datasetId, query, currency, onOpenProduct }: 
 
         <section className={`card ${countries.loading ? 'loading' : ''}`}>
           <div className="card-header">
-            <h2>Net revenue by country</h2>
+            <h2>Net product revenue by country</h2>
           </div>
           <p className="card-sub">Ignores the country filter so the whole picture stays visible.</p>
           {countries.data && countries.data.countries.length > 0 ? (
             <HBarChart
               rows={countries.data.countries.map((c) => ({ label: c.country, value: c.net_revenue }))}
               currency={currency}
-              ariaLabel="Net revenue by country"
+              ariaLabel="Net product revenue by country"
             />
           ) : (
             <p className="muted small">No sales in this period.</p>
@@ -74,11 +74,11 @@ export default function Overview({ datasetId, query, currency, onOpenProduct }: 
 
       <section className={`card ${other.loading ? 'loading' : ''}`} style={{ marginTop: 16 }}>
         <div className="card-header">
-          <h2>Other lines (not in product revenue)</h2>
+          <h2>Other lines (not in net product revenue)</h2>
         </div>
         <p className="card-sub">
           Shipping, fees, discounts, manual adjustments and similar lines are reported here instead of
-          being mixed into net revenue.
+          being mixed into net product revenue.
         </p>
         {other.data && other.data.lines.length > 0 ? (
           <div className="table-wrap">

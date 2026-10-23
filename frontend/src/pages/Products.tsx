@@ -6,7 +6,7 @@ import { useApi } from '../hooks'
 
 type SortKey = 'net_revenue' | 'gross_sales' | 'returns' | 'units' | 'orders'
 const COLUMNS: { key: SortKey; label: string; money: boolean }[] = [
-  { key: 'net_revenue', label: 'Net revenue', money: true },
+  { key: 'net_revenue', label: 'Net product revenue', money: true },
   { key: 'gross_sales', label: 'Gross sales', money: true },
   { key: 'returns', label: 'Returns', money: true },
   { key: 'units', label: 'Units', money: false },
@@ -60,7 +60,7 @@ export default function Products({ datasetId, query, currency, productId, onSele
           </div>
           {summary.data && (
             <p className="card-sub">
-              Net revenue {moneyExact(summary.data.current.net_revenue, currency)} · gross sales{' '}
+              Net product revenue {moneyExact(summary.data.current.net_revenue, currency)} · gross sales{' '}
               {moneyExact(summary.data.current.gross_sales, currency)} · returns{' '}
               {moneyExact(summary.data.current.returns, currency)} · {number(summary.data.current.units)} units ·{' '}
               {number(summary.data.current.orders)} orders
