@@ -4,7 +4,7 @@
 - Weeks: Monday to Sunday; complete weeks only. Calendar features: `england_wales`.
 - Config SHA-256: `297ac2910308b5ead78f6c38f04ba627315f14d1bb1cac4818cd0e529432207c`
 - Selection stage: 2026-10-24 01:10:08 UTC, commit `685e1b4fcbebf5157b5fd320dcd924a5c2ed0c68`
-- Holdout stage: 2026-10-24 01:11:21 UTC, commit `55b455372404e3d178b472ab067cfe5b2b9f390b`
+- Holdout stage: 2026-10-24 01:19:37 UTC, commit `5f23e25e593404e7b7a7fc6105a9d5d59831b459`
 
 > The holdout weeks are not completely unseen: aggregate weekly totals for them were inspected during the feasibility review (2026-10-24) before the candidates, selection rule, correction policy and windows were frozen. No model forecast for a holdout week existed before the model choice was fixed in selection.json.
 
