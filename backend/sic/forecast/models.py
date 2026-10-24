@@ -104,6 +104,11 @@ class PooledML(Model):
         self.min_history = self.first_target + 1  # at least one training row
         self.fitted = None
 
+    def __getstate__(self) -> dict:
+        # Saved models keep the fitted estimator; the factory (a local function used
+        # only to create new estimators) cannot be pickled and is not needed to predict.
+        return {**self.__dict__, "factory": None}
+
     def features(self, scaled: np.ndarray, t: int) -> np.ndarray:
         """Inputs for target week t, from scaled values of weeks < t only."""
         past = scaled[t - self.window : t]

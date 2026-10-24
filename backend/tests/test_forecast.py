@@ -221,3 +221,17 @@ def test_real_uci_correction_and_closure_flags(real_uci):
     kinds = data.zero_kind("22086")
     assert kinds.count("no business transactions") == 2
     assert "business active, no recorded sales" in kinds
+
+
+def test_fitted_ml_model_can_be_saved_and_reloaded(tmp_path):
+    import joblib
+
+    models = build_models(CFG, Calendar(WEEKS, "none"))
+    data = synthetic_series()
+    before = forecast_at(models["hist_gradient_boosting"], data, 80, 4)
+    joblib.dump(models["hist_gradient_boosting"], tmp_path / "m.joblib")
+    loaded = joblib.load(tmp_path / "m.joblib")
+    history = {k: v[:80] for k, v in data.items()}
+    after = loaded.predict(history, 80, 4)
+    for k in data:
+        np.testing.assert_allclose(before[k], after[k])
