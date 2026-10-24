@@ -1,13 +1,51 @@
 # Project status
 
-_Last updated: 2026-10-24 (Milestone 3 feasibility review, awaiting approval)._
+_Last updated: 2026-10-24 (end of Milestone 3)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
-**Milestone 3 (forecasting): feasibility review done; no model trained.** Waiting for the user's decisions and approval before implementing training.
-Milestone 2 is complete on macOS.
+**Milestone 3 (forecasting): complete on macOS, awaiting review.** Milestone 4 (assistant) has **not** started.
 
-## Milestone 3 so far
+## Completed: Milestone 3
+- **Approved decisions implemented:**
+  - Option A forecasting-only correction.
+  - Dashboard note for the picnic basket.
+  - Christmas closure weeks kept as £0 and flagged "inferred Christmas closure".
+  - Holiday-calendar inputs from a published list.
+  - Total + top 20 products, horizons 1–8.
+- **Frozen design:** [configs/forecast.toml](configs/forecast.toml), committed (`685e1b4`) before any model ran on the data. The pipeline has a two-stage guard: the holdout stage refuses to run if the config or data changed after selection.
+- **Code:**
+  - [backend/sic/forecast/](backend/sic/forecast/): calendar, series and corrections, models, evaluation, pipeline, report.
+  - [backend/sic/jobs.py](backend/sic/jobs.py): background job runner with progress.
+  - [backend/sic/api/forecast.py](backend/sic/api/forecast.py).
+  - [scripts/train_forecast.py](scripts/train_forecast.py).
+- **Forecast page:**
+  - Target explanation (adjusted vs reported).
+  - Training with a progress bar.
+  - Future forecast with 80% range and a seasonal-naive comparison line.
+  - Holdout backtest by horizon.
+  - Metric tables with n and n/a reasons.
+  - Automatic warnings.
+- **Dashboard:**
+  - A visible picnic-basket note on Overview/Products when that week or product is in view, linking to full details (5 transactions) on Data quality.
+  - Weekly zeros explained: "inferred Christmas closure" vs "business was trading; no recorded sales".
+- **Uploads:** train on their own data with the same rules (minimum 70 complete weeks), month-only calendar, artifacts in the upload's ignored folder.
+- **Write-up:** [docs/forecasting.md](docs/forecasting.md). Full metrics: [evaluation/forecast/uci/report.md](evaluation/forecast/uci/report.md).
+
+### Results (built-in data)
+| Group | Selected on validation | Validation mean WAPE | Holdout mean WAPE | Best on holdout |
+|---|---|---:|---:|---|
+| Business total | HistGradientBoosting | 19.3% | **24.6%** | Seasonal naive, 9.5% |
+| Top 20 products | 4-week moving average (baseline) | 50.7% | 50.4% | Same model |
+
+- **Business total, 80% intervals:** covered 0–44% of holdout weeks (calibration n = 12 → 5). Far too narrow.
+- **Products, 80% intervals:** 57–80% coverage (n = 240 → 100).
+- **Integrity record:**
+  - The holdout is **not completely unseen**: its aggregate weekly totals were inspected during the feasibility review.
+  - The first holdout run crashed while saving the model file (pickling error), before any holdout metric was written or shown. Only the serialization was fixed (`55b4553`).
+  - The final clean re-run (`14ab70a`) reproduced the metrics exactly.
+
+## Milestone 3 feasibility review
 - **Feasibility review:** [docs/forecasting_feasibility_review.md](docs/forecasting_feasibility_review.md). Reproducible with [scripts/forecast_feasibility.py](scripts/forecast_feasibility.py), which writes [evaluation/forecast_feasibility/review.json](evaluation/forecast_feasibility/review.json) and asserts the window dates.
 - **Key findings:**
   - **Weeks:** 104 complete weeks (7 Dec 2009 → 4 Dec 2011). Two weeks have no records of any kind (the Christmas closures, weeks 4 and 56). No missing data was detected: every non-trading weekday matches a UK public holiday or the Christmas closure.
@@ -61,6 +99,17 @@ Milestone 2 is complete on macOS.
 - **Memory check**: [scripts/memory_check.py](scripts/memory_check.py) (one model plus the running app), with results in [evaluation/memory/](evaluation/memory/2026-10-22_darwin-arm64.md).
 
 ## Checks performed (actual results)
+### Milestone 3
+| Check | Result |
+|---|---|
+| `uv run pytest` | **64 passed**. They cover: future-data perturbation for all 6 models; window boundaries; horizon/provisional rules; metrics including n/a; the selection rule (a baseline can win, ties go to the simpler model, the experiment is never selected); calendar; exact/unique/too-late correction matching; the real-data correction touching one week only; closure flags; model save/reload; upload training through the job API; ineligible short uploads |
+| Selection recorded before the holdout | Selection commit `685e1b4` (clean); selection results committed (`d89d3a1`) before any holdout run |
+| Holdout re-run reproducibility | `report.md` identical apart from the run timestamp and commit |
+| Browser: upload → Forecast → Train | Progress bar shown; finished; upload selected Ridge for its total on its own validation; month-only calendar; no page errors; deleted with no leftovers |
+| Browser: picnic note | Shown for periods including 6 Jun 2011, hidden for November 2011; "Details" opens 5 transactions |
+| Bank-holiday list consistency | All 17 weekday bank holidays in the data range had no trading; every non-trading weekday is a bank holiday or 24 Dec–3 Jan |
+| Upload e2e (`scripts/e2e_upload_check.py`) and screenshots | Pass; light/dark screenshots retaken, including Forecast |
+
 ### Milestone 3 (review stage)
 | Check | Result |
 |---|---|
@@ -144,18 +193,25 @@ The assistant is **not complete** until each of these is implemented **and verif
 - Validation and grounding checks reduce errors but **do not guarantee correctness**. The reports must say so.
 
 ## Pending decisions (need the user)
-1. **Picnic-basket treatment for the forecasting target:**
-   - **A (recommended):** a documented correction rule applied to the forecasting series only.
-   - **B:** no correction.
-   - **C:** exclude week 79 from validation scoring.
-   - The revenue policy stays unchanged either way.
-2. **Dashboard annotation** for product 22502 and the week of 6 June 2011 (recommended); no policy change.
-3. **Closure weeks:** keep them as zeros and add a calendar trading-days feature (recommended).
-4. **First forecasting scope:** total + top 20 products (recommended), or the total only.
-5. **Code licence:** to be discussed separately.
+1. **Business-total forecasting model.** The frozen selection (HistGradientBoosting) lost clearly to seasonal naive on the holdout, and its intervals under-cover. Options:
+   - Keep it, with the warnings shown (current state).
+   - Adopt seasonal naive as a separately labelled "v2" chosen after seeing holdout results. No untouched data would remain to test it.
+   - Revise the selection design for future data.
+2. **Code licence:** to be discussed separately.
+
+### Decided (Milestone 3)
+- Picnic basket: Option A (forecasting-only correction); dashboard note approved.
+- Closure weeks: £0, flagged "inferred Christmas closure"; published holiday calendar as inputs only.
+- Scope: total + top 20 products (selected on weeks 1–60); horizons 1–8 (6–8 provisional).
 
 ## Known issues and limitations
 ### Open issues (must stay open until verified fixed)
+- **Business-total forecast (open):**
+  - The selected model's holdout WAPE is 24.6% vs 9.5% for seasonal naive; bias rises to +33% at 8 weeks.
+  - It forecasts −£8,036 for the week of 26 Dec 2011.
+  - Its 80% ranges are too narrow.
+  - **Cause:** with two years of data, validation (Feb–Jun) contains no peak season. See decision 1.
+- **Flat product forecasts (open):** the selected 4-week moving average repeats one value for 8 weeks and cannot anticipate seasonal turns (e.g. Christmas products in January).
 - **Instruct model argument errors (open):** 81% correct arguments in the 16-question regression test. Seen errors:
   - swapped comparison periods in the main example request
   - `horizon_weeks: 20`, beyond the 8-week limit (validation caught it)
@@ -203,13 +259,10 @@ The assistant is **not complete** until each of these is implemented **and verif
   - `uv run python scripts/download_data.py`
   - `uv run python scripts/prepare_data.py` (the pinned-totals test confirms the result matches)
   - `uv run playwright install chromium` (only needed for screenshots and browser checks)
+  - `uv run python scripts/train_forecast.py --stage selection`, then `--stage holdout`. This regenerates the local model files; the tracked metrics in `evaluation/forecast/uci/` should reproduce. Uploads' models are retrained in the app.
 - **Never copied between computers:** uploaded datasets live only on the computer where they were uploaded; re-upload them if needed.
 - **Local Git settings are per clone.** On a new clone, repeat the `git config --local` steps in [docs/setup-macos.md](docs/setup-macos.md).
   - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
-Once the user has decided items 1–4 above and approved the review, implement the Milestone 3 training pipeline:
-- baselines and pooled ML models
-- rolling-origin validation, calibration and holdout evaluation
-- leakage tests
-- model card with metrics, forecast page and background training job
+After the user reviews Milestone 3 and decides on the business-total model (decision 1): **Milestone 4 (assistant and reports)**, under the completion criteria recorded above. The `run_forecast` tool will reuse `pipeline.fresh_forecast` (evaluated series and horizons only).
