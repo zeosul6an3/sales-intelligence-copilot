@@ -12,6 +12,7 @@ dependencies = [
     "pyarrow>=26",
     "python-calamine>=0.9",
     "python-multipart>=0.0.32",
+    "scikit-learn>=1.9",
     "uvicorn>=0.54",
 ]
 

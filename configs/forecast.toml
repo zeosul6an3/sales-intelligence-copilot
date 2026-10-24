@@ -1,0 +1,84 @@
+# Forecasting configuration (Milestone 3).
+#
+# FROZEN before any model was trained or the final holdout was evaluated.
+# Every training run records this file's SHA-256; the holdout stage refuses
+# to run if the selection stage used a different version. Changing anything
+# here after holdout results exist must be recorded as a new, separate run.
+
+[target]
+label = "Adjusted net product revenue"
+description = """Weekly net product revenue (product sales minus product returns, GBP for \
+the built-in data), with documented forecasting-only corrections applied. The dashboard's \
+'Net product revenue' is the same figure without those corrections."""
+week = "Monday to Sunday; complete weeks only"
+
+[windows]
+# Counted back from the last complete week of each dataset. For the built-in
+# UCI data (104 complete weeks) this gives: selection 1-60, validation 61-80,
+# calibration 81-92, holdout 93-104.
+holdout_weeks = 12
+calibration_weeks = 12
+validation_weeks = 20
+min_selection_weeks = 26  # weeks of history required before the validation window
+
+[horizon]
+max_weeks = 8
+# A horizon h is supported only if every series has at least this many
+# validation forecasts at that horizon.
+min_validation_points = 10
+# Horizons whose calibration sample per series is smaller than this are
+# reported as provisional.
+provisional_below_calibration_points = 8
+
+[products]
+top_n = 20
+# Eligible: net sales in at least this share of the selection window's
+# trading weeks, and a sale in the window's first week. Ranked by net
+# product revenue inside the selection window only.
+min_active_share = 0.75
+
+[features]
+short_lags = [1, 2, 3, 4]
+rolling_window = 8   # rolling mean and std over lags 1..8
+seasonal_lag = 52    # used only by the seasonal-naive baseline and the experiment
+
+[selection]
+# Chosen separately for the business total and for the product group.
+# Metric: WAPE on validation forecasts, averaged with equal weight over every
+# supported horizon. For the product group, WAPE pools all product-weeks
+# (sum of absolute errors / sum of absolute actuals), so larger products
+# weigh more. Lower is better.
+metric = "mean_validation_wape_over_horizons"
+candidates = ["naive", "moving_average_4", "seasonal_naive", "ridge", "hist_gradient_boosting"]
+# Reported separately; never eligible for selection.
+experiments = ["hist_gradient_boosting_lag52"]
+# If another candidate is within this absolute WAPE difference of the best,
+# the simpler model (earlier in `candidates`) is chosen.
+tie_tolerance = 0.005
+
+[intervals]
+coverage = 0.80  # empirical 10th-90th percentile of calibration residuals, per horizon
+
+[models.ridge]
+alpha = 1.0
+
+[models.hist_gradient_boosting]
+max_iter = 200
+learning_rate = 0.05
+max_leaf_nodes = 15
+min_samples_leaf = 20
+random_state = 0
+
+[corrections]
+# Forecasting-only correction (approved Option A): a Manual credit on a
+# C-invoice that exactly reverses one, and only one, product-sale line of the
+# same customer within this many minutes and of at least this value.
+manual_reversal_min_value = 1000.0
+manual_reversal_max_minutes = 30
+
+[calendar]
+# Holiday indicators come from a fixed published calendar, never from
+# transactions. "england_wales" for the built-in UK data; uploads use "none"
+# because their country is unknown.
+builtin = "england_wales"
+uploads = "none"
