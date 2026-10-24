@@ -204,7 +204,8 @@ def find_corrections(con, weeks: list[date], cfg: dict) -> list[dict]:
     def line(line_id: int) -> dict:
         cur = con.execute(
             """SELECT line_id, source_sheet, source_row, invoice_id,
-                      CAST(invoice_ts AS VARCHAR) AS invoice_ts, product_id, raw_description,
+                      CAST(invoice_ts AS VARCHAR) AS invoice_ts, product_id, product_name,
+                      raw_description,
                       quantity, unit_price, line_value, customer_id, line_type
                FROM lines WHERE line_id = ?""",
             [line_id],
@@ -237,7 +238,7 @@ def find_corrections(con, weeks: list[date], cfg: dict) -> list[dict]:
                 "amount": round(-credit["line_value"], 2),
                 "week_start": week.isoformat(),
                 "product_id": sale["product_id"],
-                "product_name": sale["raw_description"],
+                "product_name": sale["product_name"],  # display name, as in rankings
                 "customer_id": sale["customer_id"],
                 "source_rows": {"sale": sale, "reversal": credit},
             }

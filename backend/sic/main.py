@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from sic import __version__
-from sic.api import datasets, uploads
+from sic.api import datasets, forecast, uploads
 from sic.config import FRONTEND_DIST, get_settings
 
 
@@ -33,6 +33,7 @@ def create_app() -> FastAPI:
 
     app.include_router(datasets.router)
     app.include_router(uploads.router)
+    app.include_router(forecast.router)
 
     # Serve the compiled React dashboard if it has been built. API routes are
     # registered first, so /api/... is never shadowed by the static files.

@@ -6,7 +6,7 @@ into SQL text: filters are passed as query parameters.
 """
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 
 import duckdb
 
@@ -105,8 +105,11 @@ def summary(con: duckdb.DuckDBPyConnection, filters: Filters) -> dict:
 def timeseries(con: duckdb.DuckDBPyConnection, filters: Filters, freq: str) -> list[dict]:
     """Net product revenue, gross sales, returns and orders per week or month.
 
-    Empty periods (e.g. Christmas closures) appear with zeros. A period is marked
-    partial if it is cut off by the filter range or by the data's coverage.
+    Empty periods appear with zeros and say why: either the business recorded no
+    transactions of any kind (flagged "inferred Christmas closure" when the period
+    touches 24 Dec-1 Jan; never a confirmed closure), or the business was trading
+    but this selection had no sales. A period is marked partial if it is cut off
+    by the filter range or by the data's coverage.
     """
     if freq not in ("week", "month", "day"):
         raise ValueError("freq must be day, week or month")
@@ -128,29 +131,58 @@ def timeseries(con: duckdb.DuckDBPyConnection, filters: Filters, freq: str) -> l
                    {METRIC_SQL["orders"]} AS orders,
                    bool_or(is_unusual) AS has_unusual
             FROM lines WHERE {where} GROUP BY 1
+        ),
+        business AS (  -- all line types, ignoring country/product filters
+            SELECT CAST(date_trunc('{freq}', invoice_date) AS DATE) AS period_start,
+                   count(*) AS business_lines
+            FROM lines GROUP BY 1
         )
-        SELECT b.period_start, b.period_end,
+        SELECT b.period_start, b.period_end, coalesce(business_lines, 0) AS business_lines,
                coalesce(gross_sales, 0) AS gross_sales, coalesce(returns, 0) AS returns,
                coalesce(net_revenue, 0) AS net_revenue, coalesce(orders, 0) AS orders,
                coalesce(has_unusual, false) AS has_unusual
         FROM buckets b LEFT JOIN agg USING (period_start)
+             LEFT JOIN business USING (period_start)
         ORDER BY b.period_start
     """
     rows = _rows(con, sql, [filters.period.start, filters.period.end, *params])
     lower, upper = max(first, filters.period.start), min(last, filters.period.end)
-    return [
-        {
-            "period_start": r["period_start"].isoformat(),
-            "period_end": r["period_end"].isoformat(),
-            "gross_sales": _round(r["gross_sales"]),
-            "returns": _round(r["returns"]),
-            "net_revenue": _round(r["net_revenue"]),
-            "orders": int(r["orders"]),
-            "partial": r["period_start"] < lower or r["period_end"] > upper,
-            "has_unusual": bool(r["has_unusual"]),
-        }
-        for r in rows
-    ]
+    points = []
+    for r in rows:
+        partial = r["period_start"] < lower or r["period_end"] > upper
+        note = None
+        if not partial and r["business_lines"] == 0:
+            note = (
+                "inferred Christmas closure"
+                if _touches_christmas(r["period_start"], r["period_end"])
+                else "no business transactions recorded"
+            )
+        elif not partial and r["gross_sales"] == 0 and r["returns"] == 0:
+            note = "business was trading; no recorded sales for this selection"
+        points.append(
+            {
+                "period_start": r["period_start"].isoformat(),
+                "period_end": r["period_end"].isoformat(),
+                "gross_sales": _round(r["gross_sales"]),
+                "returns": _round(r["returns"]),
+                "net_revenue": _round(r["net_revenue"]),
+                "orders": int(r["orders"]),
+                "partial": partial,
+                "has_unusual": bool(r["has_unusual"]),
+                "no_business_transactions": not partial and r["business_lines"] == 0,
+                "note": note,
+            }
+        )
+    return points
+
+
+def _touches_christmas(start: date, end: date) -> bool:
+    day = start
+    while day <= end:
+        if (day.month == 12 and day.day >= 24) or (day.month == 1 and day.day == 1):
+            return True
+        day += timedelta(days=1)
+    return False
 
 
 def products(

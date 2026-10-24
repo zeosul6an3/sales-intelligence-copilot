@@ -225,6 +225,22 @@ def run_holdout(dataset_id: str, progress: Progress | None = None) -> dict:
                     }
                 )
             future[sid] = {"model": name, "points": rows}
+    # Comparison line only (no intervals, no effect on selection): the seasonal-naive
+    # forecast, shown beside the selected model so the holdout comparison stays visible.
+    if models["seasonal_naive"].available(origin):
+        comparison = forecast_at(models["seasonal_naive"], data.adjusted, origin, max_h)
+        for sid in future:
+            future[sid]["comparison"] = {
+                "model": "seasonal_naive",
+                "points": [
+                    {
+                        "week_start": p["week_start"],
+                        "h": p["h"],
+                        "forecast": float(comparison[sid][p["h"] - 1]),
+                    }
+                    for p in future[sid]["points"]
+                ],
+            }
     joblib.dump(
         {
             "models": fitted,

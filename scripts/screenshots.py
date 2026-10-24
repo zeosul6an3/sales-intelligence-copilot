@@ -19,6 +19,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PAGES = [
     ("overview", "Overview", None),
     ("products", "Products", "WHITE HANGING HEART T-LIGHT HOLDER"),
+    ("forecast", "Forecast", None),
     ("data-quality", "Data quality", None),
     ("datasets", "Datasets & upload", None),
 ]

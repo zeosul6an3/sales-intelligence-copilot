@@ -2,7 +2,7 @@
 
 from collections.abc import Iterator
 from contextlib import contextmanager
-from datetime import date
+from datetime import date, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, HTTPException, Query
@@ -180,3 +180,71 @@ def remove_dataset(dataset_id: str) -> dict:
     except storage.DatasetNotFound as exc:
         raise HTTPException(404, f"Dataset '{dataset_id}' not found.") from exc
     return {"deleted": dataset_id}
+
+
+@router.get("/datasets/{dataset_id}/known-issues")
+def known_issues(dataset_id: str) -> dict:
+    """Documented discrepancies the dashboard should explain (no figures are changed)."""
+    from sic.forecast import config as forecast_config
+    from sic.forecast.series import complete_weeks, find_corrections
+
+    with opened(dataset_id) as con:
+        found = find_corrections(con, complete_weeks(con), forecast_config.load())
+        issues = []
+        for c in found:
+            sale = c["source_rows"]["sale"]
+            day = sale["invoice_ts"][:10]
+            related = con.execute(
+                """SELECT invoice_id, CAST(invoice_ts AS VARCHAR), product_id, raw_description,
+                          quantity, unit_price, line_value, line_type
+                   FROM lines WHERE customer_id = ? AND invoice_date = CAST(? AS DATE)
+                   ORDER BY invoice_ts, line_id""",
+                [c["customer_id"], day],
+            ).fetchall()
+            week_end = (date.fromisoformat(c["week_start"]) + timedelta(days=6)).isoformat()
+            issues.append(
+                {
+                    "id": c["id"],
+                    "week_start": c["week_start"],
+                    "week_end": week_end,
+                    "product_id": c["product_id"],
+                    "product_name": c["product_name"],
+                    "amount": c["amount"],
+                    "summary": _issue_summary(c, day),
+                    "forecasting_treatment": (
+                        "Forecasts use 'Adjusted net product revenue', which applies this "
+                        "reversal; the dashboard keeps the agreed policy."
+                    ),
+                    "transactions": [
+                        dict(
+                            zip(
+                                (
+                                    "invoice_id",
+                                    "invoice_ts",
+                                    "product_id",
+                                    "description",
+                                    "quantity",
+                                    "unit_price",
+                                    "line_value",
+                                    "line_type",
+                                ),
+                                row,
+                                strict=True,
+                            )
+                        )
+                        for row in related
+                    ],
+                }
+            )
+    return {"issues": issues}
+
+
+def _issue_summary(c: dict, day: str) -> str:
+    amount = f"£{c['amount']:,.2f}"
+    return (
+        f"A {amount} sale of {c['product_name']} on {day} was reversed minutes later by a "
+        "Manual credit. Under the agreed policy Manual lines sit outside net product revenue, "
+        f"so net product revenue for that week and that product is {amount} higher than what "
+        "the customer actually bought. This can lift the product in rankings for any period "
+        "that includes it."
+    )
