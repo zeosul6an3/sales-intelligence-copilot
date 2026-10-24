@@ -53,6 +53,8 @@ export type SeriesPoint = {
   orders: number
   partial: boolean
   has_unusual: boolean
+  no_business_transactions: boolean
+  note: string | null
 }
 
 export type ProductRow = {
@@ -191,4 +193,135 @@ export function withQuery(path: string, params: Record<string, string | number |
   }
   const text = search.toString()
   return text ? `${path}?${text}` : path
+}
+
+export type KnownIssue = {
+  id: string
+  week_start: string
+  week_end: string
+  product_id: string
+  product_name: string
+  amount: number
+  summary: string
+  forecasting_treatment: string
+  transactions: {
+    invoice_id: string
+    invoice_ts: string
+    product_id: string
+    description: string | null
+    quantity: number
+    unit_price: number
+    line_value: number
+    line_type: string
+  }[]
+}
+
+export type NA = { value: number | null; reason?: string }
+export type MetricCell = {
+  n: number
+  mae: NA
+  rmse: NA
+  wape: NA
+  bias: NA
+  skill_vs_naive: NA
+  skill_vs_seasonal_naive: NA
+}
+export type MetricTable = Record<string, Record<string, Record<string, MetricCell>>>
+
+export type FuturePoint = {
+  week_start: string
+  h: number
+  forecast: number
+  lower: number | null
+  upper: number | null
+  provisional: boolean
+}
+
+export type Evaluation = {
+  dataset_id: string
+  target: { label: string; description: string; week: string }
+  calendar: string
+  windows: Record<string, { weeks: string; count: number; from: string; to: string }>
+  horizons: Record<
+    string,
+    {
+      supported: boolean
+      provisional: boolean
+      validation_points_per_series: number
+      calibration_points_per_series: number
+      holdout_points_per_series: number
+    }
+  >
+  series: { id: string; name: string }[]
+  product_selection: { rule: string; eligible: number; products_with_sales: number }
+  corrections: {
+    id: string
+    amount: number
+    week_start: string
+    product_id: string
+    product_name: string
+    applied_to: string[]
+    product_in_forecast_set: boolean
+    total_week_reported: number
+    total_week_adjusted: number
+    product_week_reported: number
+    product_week_adjusted: number
+    rationale: string
+    rule: string
+  }[]
+  decision: Record<
+    string,
+    { selected: string; mean_validation_wape: Record<string, number>; tie_rule_applied: boolean }
+  >
+  selection_rule: { metric: string; candidates: string[]; experiments: string[]; tie_tolerance: number }
+  validation_metrics: MetricTable
+  holdout_metrics: MetricTable
+  holdout_metrics_by_series: MetricTable
+  holdout_coverage: Record<string, Record<string, { coverage: number; n: number }>>
+  calibration_quantiles: Record<string, Record<string, { n: number }>>
+  holdout_note: string
+  selection_created_at_utc: string
+  holdout_created_at_utc: string
+  history: {
+    weeks: string[]
+    week_flags: (string | null)[]
+    adjusted: Record<string, number[]>
+    reported: Record<string, number[]>
+    zero_kind: Record<string, (string | null)[]>
+  }
+  holdout_predictions: {
+    model: string
+    series: string
+    h: number
+    week_start: string
+    actual: number
+    forecast: number
+    lower: number | null
+    upper: number | null
+  }[]
+  future_forecast: {
+    origin_week: string
+    series: Record<
+      string,
+      { model: string; points: FuturePoint[]; comparison?: { model: string; points: { week_start: string; forecast: number }[] } }
+    >
+  }
+}
+
+export type Job = {
+  id: string
+  dataset_id: string
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'not_eligible' | 'interrupted'
+  progress: number
+  message: string
+  error: string | null
+  created_at_utc: string
+  finished_at_utc: string | null
+}
+
+export type ForecastOverview = {
+  target: { label: string; description: string }
+  eligibility: { eligible: boolean; reason: string | null }
+  evaluation: Evaluation | null
+  job: Job | null
 }

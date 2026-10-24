@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { withQuery, type ProductRow, type Query, type SeriesPoint, type Summary } from '../api'
+import { KnownIssueNotes, useKnownIssues } from '../components/KnownIssues'
 import TrendChart from '../components/TrendChart'
 import { moneyExact, number } from '../format'
 import { useApi } from '../hooks'
@@ -13,9 +14,17 @@ const COLUMNS: { key: SortKey; label: string; money: boolean }[] = [
   { key: 'orders', label: 'Orders', money: false },
 ]
 
-type Props = { datasetId: string; query: Query; currency: string; productId: string | null; onSelect: (id: string | null) => void }
+type Props = {
+  datasetId: string
+  query: Query
+  currency: string
+  productId: string | null
+  onSelect: (id: string | null) => void
+  onOpenIssue: () => void
+}
 
-export default function Products({ datasetId, query, currency, productId, onSelect }: Props) {
+export default function Products({ datasetId, query, currency, productId, onSelect, onOpenIssue }: Props) {
+  const issues = useKnownIssues(datasetId)
   const [search, setSearch] = useState('')
   const [debounced, setDebounced] = useState('')
   const [sortBy, setSortBy] = useState<SortKey>('net_revenue')
@@ -66,6 +75,13 @@ export default function Products({ datasetId, query, currency, productId, onSele
               {number(summary.data.current.orders)} orders
             </p>
           )}
+          <KnownIssueNotes
+            issues={issues}
+            currency={currency}
+            onOpenIssue={onOpenIssue}
+            period={query}
+            productId={productId}
+          />
           {series.error && <div className="notice notice-error">{series.error}</div>}
           {series.data && (
             <TrendChart points={series.data.points} freq={freq} currency={currency} onFreqChange={setFreq} />

@@ -1,12 +1,12 @@
 import { useEffect, useRef } from 'react'
 import * as echarts from 'echarts/core'
 import { BarChart, LineChart } from 'echarts/charts'
-import { GridComponent, MarkAreaComponent, TooltipComponent } from 'echarts/components'
+import { GridComponent, LegendComponent, MarkAreaComponent, TooltipComponent } from 'echarts/components'
 import { SVGRenderer } from 'echarts/renderers'
 import type { EChartsCoreOption } from 'echarts/core'
 import { usePrefersDark } from '../hooks'
 
-echarts.use([BarChart, LineChart, GridComponent, TooltipComponent, MarkAreaComponent, SVGRenderer])
+echarts.use([BarChart, LineChart, GridComponent, LegendComponent, TooltipComponent, MarkAreaComponent, SVGRenderer])
 
 /** Chart colours, read from the CSS tokens so charts follow light/dark mode. */
 export function chartTokens() {
@@ -15,6 +15,9 @@ export function chartTokens() {
   return {
     series: v('--series-1'),
     seriesSoft: v('--series-1-soft'),
+    series2: v('--series-2'),
+    series3: v('--series-3'),
+    band: v('--band'),
     surface: v('--surface'),
     text: v('--text'),
     textSecondary: v('--text-secondary'),

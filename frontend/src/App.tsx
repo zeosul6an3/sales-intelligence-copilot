@@ -4,13 +4,15 @@ import { shortDate } from './format'
 import { useApi } from './hooks'
 import DataQuality from './pages/DataQuality'
 import Datasets from './pages/Datasets'
+import Forecast from './pages/Forecast'
 import Overview from './pages/Overview'
 import Products from './pages/Products'
 
-type Tab = 'overview' | 'products' | 'quality' | 'datasets'
+type Tab = 'overview' | 'products' | 'forecast' | 'quality' | 'datasets'
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'products', label: 'Products' },
+  { id: 'forecast', label: 'Forecast' },
   { id: 'quality', label: 'Data quality' },
   { id: 'datasets', label: 'Datasets & upload' },
 ]
@@ -51,6 +53,11 @@ export default function App() {
     const p = info.data.presets[preset] ?? info.data.presets.all_data
     return { start: p.start, end: p.end, country }
   }, [info.data, preset, custom, country])
+
+  const openIssue = () => {
+    setTab('quality')
+    setTimeout(() => document.getElementById('known-issues')?.scrollIntoView({ behavior: 'smooth' }), 300)
+  }
 
   const metadata = info.data?.metadata
   const currency = metadata?.currency ?? 'GBP'
@@ -161,6 +168,7 @@ export default function App() {
             setProductId(id)
             setTab('products')
           }}
+          onOpenIssue={openIssue}
         />
       )}
       {query && tab === 'products' && (
@@ -170,8 +178,10 @@ export default function App() {
           currency={currency}
           productId={productId}
           onSelect={setProductId}
+          onOpenIssue={openIssue}
         />
       )}
+      {tab === 'forecast' && <Forecast datasetId={datasetId} currency={currency} onOpenIssue={openIssue} />}
       {tab === 'quality' && <DataQuality datasetId={datasetId} currency={currency} />}
       {tab === 'datasets' && (
         <Datasets

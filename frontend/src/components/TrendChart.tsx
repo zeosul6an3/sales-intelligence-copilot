@@ -44,6 +44,7 @@ export default function TrendChart({ points, freq, currency, onFreqChange, title
           const notes = [
             p.partial ? 'Partial period (not fully covered by the data or the filter)' : '',
             p.has_unusual ? 'Contains an unusually large line (see Data quality)' : '',
+            p.note ? `Note: ${p.note}` : '',
           ].filter(Boolean)
           return `<strong>${shortDate(p.period_start)} – ${shortDate(p.period_end)}</strong><br/>${
             METRIC_LABELS[metric]
@@ -141,7 +142,7 @@ export default function TrendChart({ points, freq, currency, onFreqChange, title
                   <td className="num">{moneyExact(p.returns, currency)}</td>
                   <td className="num">{number(p.orders)}</td>
                   <td className="small muted">
-                    {[p.partial && 'partial', p.has_unusual && 'unusual line'].filter(Boolean).join(', ')}
+                    {[p.partial && 'partial', p.has_unusual && 'unusual line', p.note].filter(Boolean).join(', ')}
                   </td>
                 </tr>
               ))}

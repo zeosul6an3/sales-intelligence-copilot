@@ -1,6 +1,7 @@
 import type { Definitions, Issue, QualityReport } from '../api'
 import { moneyExact, number } from '../format'
 import { useApi } from '../hooks'
+import { KnownIssueDetails, useKnownIssues } from '../components/KnownIssues'
 
 const SEVERITY_LABEL = { error: '✕ Error', warning: '! Warning', info: 'i Info' }
 
@@ -39,6 +40,7 @@ type Flag = { rows?: number; value?: number; codes?: number; treatment?: string;
 export default function DataQuality({ datasetId, currency }: { datasetId: string; currency: string }) {
   const report = useApi<QualityReport>(`/api/datasets/${datasetId}/quality`)
   const definitions = useApi<Definitions>('/api/definitions')
+  const issues = useKnownIssues(datasetId)
   if (report.error) return <div className="notice notice-error">{report.error}</div>
   if (!report.data) return <p className="muted">Loading…</p>
   const r = report.data
@@ -159,6 +161,8 @@ export default function DataQuality({ datasetId, currency }: { datasetId: string
           )}
         </section>
       )}
+
+      <KnownIssueDetails issues={issues} currency={currency} />
 
       {r.issues && r.issues.length > 0 && (
         <section className="card">

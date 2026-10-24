@@ -1,14 +1,22 @@
 import { useState } from 'react'
 import { withQuery, type CountryRow, type OtherLine, type ProductRow, type Query, type SeriesPoint, type Summary } from '../api'
 import HBarChart from '../components/HBarChart'
+import { KnownIssueNotes, useKnownIssues } from '../components/KnownIssues'
 import KpiTiles from '../components/KpiTiles'
 import TrendChart from '../components/TrendChart'
 import { moneyExact, number } from '../format'
 import { useApi } from '../hooks'
 
-type Props = { datasetId: string; query: Query; currency: string; onOpenProduct: (id: string) => void }
+type Props = {
+  datasetId: string
+  query: Query
+  currency: string
+  onOpenProduct: (id: string) => void
+  onOpenIssue: () => void
+}
 
-export default function Overview({ datasetId, query, currency, onOpenProduct }: Props) {
+export default function Overview({ datasetId, query, currency, onOpenProduct, onOpenIssue }: Props) {
+  const issues = useKnownIssues(datasetId)
   const [freq, setFreq] = useState<'week' | 'month'>('week')
   const base = `/api/datasets/${datasetId}`
   const summary = useApi<Summary>(withQuery(`${base}/summary`, query))
@@ -25,6 +33,7 @@ export default function Overview({ datasetId, query, currency, onOpenProduct }: 
   return (
     <>
       {error && <div className="notice notice-error">{error}</div>}
+      <KnownIssueNotes issues={issues} currency={currency} onOpenIssue={onOpenIssue} period={query} />
       {summary.data && (
         <div className={summary.loading ? 'loading' : ''}>
           <KpiTiles summary={summary.data} currency={currency} />

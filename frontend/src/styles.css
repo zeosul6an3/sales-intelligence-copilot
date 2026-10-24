@@ -15,6 +15,9 @@
   --axis: #c3c2b7;
   --series-1: #2a78d6;
   --series-1-soft: #86b6ef;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --band: rgba(235, 104, 52, 0.16);
   --accent: #2a78d6;
   --good-text: #006300;
   --bad-text: #b42318;
@@ -42,6 +45,9 @@
     --axis: #383835;
     --series-1: #3987e5;
     --series-1-soft: #1c5cab;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --band: rgba(217, 89, 38, 0.24);
     --accent: #5598e7;
     --good-text: #0ca30c;
     --bad-text: #f07070;
@@ -434,3 +440,20 @@ tr.selected {
   margin: 12px 0;
 }
 a { color: var(--accent); }
+
+.progress {
+  height: 8px;
+  background: var(--grid);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+
+.progress > div {
+  height: 100%;
+  background: var(--accent);
+}
+
+tr.highlight td {
+  font-weight: 600;
+}
