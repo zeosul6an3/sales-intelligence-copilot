@@ -206,7 +206,7 @@ The revenue-basis label "Adjusted net product revenue" is always stated. Where n
 **Storage and Git:**
 - **Built-in reports:** `data/reports/<report_id>/` (ignored by Git).
 - **Upload reports:** inside the upload's own folder, deleted with it, **never in Git**.
-- **Committed sample:** **one** selected built-in-data report (the example request), committed to **`docs/examples/`** as HTML plus its CSVs, after you've checked it. The repository stays **private**.
+- **Committed sample:** **one** selected built-in-data report (the example request), committed to **`docs/examples/`** as HTML plus its CSVs, after you've checked it. The repository is **public** (authorized by you on 2026-10-26), so the sample must contain built-in data only.
 
 **Consistency tests:**
 - the HTML table values, the CSV values and a fresh API call with the same filters are identical
@@ -226,7 +226,7 @@ The revenue-basis label "Adjusted net product revenue" is always stated. Where n
 **How your 5 questions are handled:**
 1. I freeze and commit the prompts, tools and settings.
 2. You give me the 5 questions.
-3. I write their expected answers (with pandas) and **commit those before running them**.
+3. I write their expected answers (with pandas). Before running, I commit only a **SHA-256 of the questions and expected answers**, not the text, because the repository is public. The text is committed after the run, with your agreement.
 4. The run happens once, and the results are reported **separately** from the other sets.
 5. The questions are published in the evaluation report only with your agreement.
 
@@ -310,7 +310,10 @@ Each question is run with **3 fixed seeds**. These are **repeated measurements o
 - **Your questions:** you write 5 evaluation questions and keep them private until tuning is frozen.
 - **Placement:** a dedicated Assistant tab.
 - **CSVs:** individual CSV downloads plus a ZIP.
-- **Sample report:** one selected built-in-data report in `docs/examples/`. Uploaded-data reports stay outside Git, and the repository stays private.
+- **Sample report:** one selected built-in-data report in `docs/examples/`. Uploaded-data reports stay outside Git.
+- **Repository visibility (2026-10-26):** **public**, explicitly authorized by you; it must not be switched back. This supersedes the earlier private-repository requirement.
+  - **Stays outside Git:** credentials, uploaded datasets and their reports and models, downloaded and processed data, and runtime files.
+  - **Your 5 questions:** because the repository is public, they are **not committed until after their run**, and are published only with your agreement. Only a SHA-256 of them is committed before the run, so the record shows they weren't changed.
 
 ## 12. Changes from revision 1
 1. **Comparison intent:**

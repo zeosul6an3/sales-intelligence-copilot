@@ -100,7 +100,7 @@ Read this first when resuming work on any computer.
   - Repository initialised on `main`.
   - Author `zeosul6an3` with the GitHub no-reply email, set **locally only** (no global Git config exists).
   - GitHub credentials come from `gh`, also configured locally.
-- **GitHub**: private repository https://github.com/zeosul6an3/sales-intelligence-copilot. Visibility was checked as `PRIVATE`.
+- **GitHub**: repository https://github.com/zeosul6an3/sales-intelligence-copilot. It was created private; it has been **public since 2026-10-26** by the owner's own choice (see Decisions).
 - **Backend skeleton**: FastAPI app (Python 3.13.17) with `/api/health`, which reports API and Ollama status.
   - `uv run sic serve` builds the dashboard if needed and serves it on 127.0.0.1:8000.
 - **Dashboard skeleton**: React 19 + TypeScript 6 + Vite 8, based on the official template. It shows a status page, with colour tokens for light and dark mode.
@@ -159,7 +159,11 @@ Read this first when resuming work on any computer.
 
 ## Decisions
 - Architecture, data policies, forecasting and agent design: see the approved plan, summarised in the README.
-- Repository stays **private permanently** unless the user says otherwise. **No code licence** has been chosen yet.
+- **Repository visibility: public, explicitly authorized by the owner on 2026-10-26.**
+  - The owner made it public themself, and it must **not** be switched back to private.
+  - This supersedes the earlier "private permanently" requirement.
+  - Credentials, uploaded datasets and their reports/models, downloaded and processed data, and local runtime artifacts stay outside Git (enforced by `.gitignore`).
+- **No code licence** has been chosen yet. A public repository without a licence can be viewed, but others have no right to reuse the code. To be discussed separately.
 - Git identity and credentials are configured per repository only.
 - GitHub CLI was installed from the release's signed arm64 zip into `~/.local/bin`, because the universal `.pkg` was unsigned and Gatekeeper blocked it.
 - TypeScript 6 (as pinned by the official Vite template) instead of TypeScript 7.
