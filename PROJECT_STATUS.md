@@ -1,6 +1,6 @@
 # Project status
 
-_Last updated: 2026-10-26 (Milestone 4 plan proposed; not implemented)._
+_Last updated: 2026-10-26 (Milestone 4 plan revision 2 proposed; not implemented)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
@@ -196,13 +196,22 @@ Read this first when resuming work on any computer.
 ### Completion criteria for the assistant (Milestone 4)
 The assistant is **not complete** until each of these is implemented **and verified**:
 1. **Business definitions:** gross sales, returns (a £ value) and net revenue are defined explicitly for the model and match the metrics layer. Questions like "what did returns cost us" are answered with the returns metric, not refused.
-2. **Comparison direction:** application code puts compared periods in chronological order, or presets such as "last two complete months" are used, so declines can't silently become increases.
-3. **Forecast limits:** horizons beyond the evaluated maximum, and ineligible series, are rejected by validation with a clear explanation.
+2. **Comparison intent:**
+   - Presets such as "last two complete months" resolve chronologically.
+   - An **explicitly requested baseline is never reordered** ("October relative to November" ≠ "November relative to October").
+   - Results state baseline and comparison dates.
+   - Both directions are tested.
+3. **Dataset-specific forecast limits:**
+   - Only the active dataset's evaluated series and supported horizons are accepted, otherwise the request is rejected with a clear explanation.
+   - No built-in top-20 restriction is hard-coded for uploads.
+   - Only limitations that apply to that dataset and series are returned: the UCI correction and override never appear for uploads or product forecasts.
 4. **Tool-based calculations:** every figure in an answer comes from a tool result, and the model does no arithmetic. Meaning-level checks confirm the metric, dataset, product, currency, filters and period.
 
 **Evaluation requirement:**
-- Measure these changes on **both** the existing 16 regression questions **and** a new set of **held-out questions** written separately and **not used to tune prompts or tools**.
-- Report the actual accuracy on each set separately.
+- Measure these changes on the 16 regression questions, an AI-written held-out set frozen before tuning, and **5 private questions written by the user**, given to Claude only after prompts, tools and settings are frozen.
+- Report each set separately.
+- **Seeds:** the three seeds are **repeated measurements**. Report per-seed accuracy over unique questions and repeat consistency; never treat repeats as independent questions.
+- **Reviews:** Claude's review is labelled **AI-assisted**, and a sample of answers is provided for the user's own review.
 - Validation and grounding checks reduce errors but **do not guarantee correctness**. The reports must say so.
 
 ## Pending decisions (need the user)
@@ -276,10 +285,16 @@ The assistant is **not complete** until each of these is implemented **and verif
   - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
-**Milestone 4 plan written; awaiting approval:** [docs/milestone4_plan.md](docs/milestone4_plan.md). It covers tools, agent loop, grounding checks, the Assistant tab, HTML/CSV reports, frozen regression/development/held-out evaluation sets, report-consistency tests and a complete-app memory test. Open decisions:
-- whether the user writes 5–10 held-out questions
-- Assistant tab or side panel
-- CSV delivery
-- whether to commit a sample report
-
-Nothing in Milestone 4 has been implemented.
+**Milestone 4 plan, revision 2, awaiting approval:** [docs/milestone4_plan.md](docs/milestone4_plan.md).
+- **Decisions recorded:**
+  - 5 private user questions
+  - a dedicated Assistant tab
+  - individual CSVs plus a ZIP
+  - one built-in-data sample report in `docs/examples/`
+- **Revised for:**
+  - preserved comparison intent
+  - dataset-specific forecasts and limitations
+  - the example request in 4 tool calls (batched trends, combined chart)
+  - preserved trend frequency
+  - seed handling and AI-assisted review labelling
+- **Not yet implemented:** nothing in Milestone 4.
