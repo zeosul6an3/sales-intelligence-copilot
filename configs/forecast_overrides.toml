@@ -1,0 +1,26 @@
+# Operational overrides, chosen AFTER the final holdout was evaluated.
+#
+# These change which model the app uses for forecasts. They do NOT change the
+# frozen design (configs/forecast.toml), the recorded validation selection or
+# the evaluation history in evaluation/forecast/. Because each override was
+# chosen after seeing holdout results, the holdout figures are NOT an
+# independent evaluation of it, and no untouched data remains to provide one.
+#
+# Only the built-in dataset ("uci") may be overridden. Uploaded datasets always
+# use their own validation-based selection.
+
+[[override]]
+dataset = "uci"
+group = "total"                      # "total" or "products"
+model = "seasonal_naive"
+replaces = "hist_gradient_boosting"  # the frozen validation selection, kept on record
+decided_on = "2026-10-26"
+decided_by = "project owner"
+independent_evaluation = false
+reason = """On the final holdout (12 Sep - 4 Dec 2011) the frozen selection, \
+HistGradientBoosting, had mean WAPE 24.6% against 9.5% for seasonal naive, a bias \
+rising to +33% at 8 weeks, a negative forecast for the week of 26 Dec 2011 and \
+80% ranges covering 0-44% of weeks. The validation window (Feb-Jun 2011) contained \
+no peak season. Seasonal naive is adopted as the operational default for the \
+business total; this choice was made after seeing those holdout results."""
+evidence = "evaluation/forecast/uci/report.md"

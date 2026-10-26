@@ -41,6 +41,7 @@ def forecast_overview(dataset_id: str) -> dict:
         "target": cfg["target"],
         "eligibility": eligibility,
         "evaluation": evaluation,
+        "operational": pipeline.load_operational(dataset_id),
         "job": jobs.latest(dataset_id),
     }
 

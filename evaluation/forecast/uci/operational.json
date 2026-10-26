@@ -1,0 +1,2647 @@
+{
+  "dataset_id": "uci",
+  "created_at_utc": "2026-10-26 12:42:29",
+  "config_sha256": "297ac2910308b5ead78f6c38f04ba627315f14d1bb1cac4818cd0e529432207c",
+  "data_fingerprint": "7ffb37d4d3795e6356cd3642c29a849f492673a17ee9d1c0ee7f78b9e3d9ac5a",
+  "overrides_file": "configs/forecast_overrides.toml",
+  "groups": {
+    "total": {
+      "model": "seasonal_naive",
+      "source": "override, chosen after the holdout",
+      "frozen_selection": "hist_gradient_boosting",
+      "override": {
+        "dataset": "uci",
+        "group": "total",
+        "model": "seasonal_naive",
+        "replaces": "hist_gradient_boosting",
+        "decided_on": "2026-10-26",
+        "decided_by": "project owner",
+        "independent_evaluation": false,
+        "reason": "On the final holdout (12 Sep - 4 Dec 2011) the frozen selection, HistGradientBoosting, had mean WAPE 24.6% against 9.5% for seasonal naive, a bias rising to +33% at 8 weeks, a negative forecast for the week of 26 Dec 2011 and 80% ranges covering 0-44% of weeks. The validation window (Feb-Jun 2011) contained no peak season. Seasonal naive is adopted as the operational default for the business total; this choice was made after seeing those holdout results.",
+        "evidence": "evaluation/forecast/uci/report.md"
+      },
+      "evaluation_note": "Chosen after reviewing holdout results: the holdout figures for this model are not an independent evaluation of the decision, and no untouched data remains to provide one.",
+      "interval_calibration_n": {
+        "1": 12,
+        "2": 11,
+        "3": 10,
+        "4": 9,
+        "5": 8,
+        "6": 7,
+        "7": 6,
+        "8": 5
+      },
+      "interval_holdout_coverage": {
+        "1": {
+          "coverage": 0.5833333333333334,
+          "n": 12
+        },
+        "2": {
+          "coverage": 0.6363636363636364,
+          "n": 11
+        },
+        "3": {
+          "coverage": 0.6,
+          "n": 10
+        },
+        "4": {
+          "coverage": 0.6666666666666666,
+          "n": 9
+        },
+        "5": {
+          "coverage": 0.625,
+          "n": 8
+        },
+        "6": {
+          "coverage": 0.7142857142857143,
+          "n": 7
+        },
+        "7": {
+          "coverage": 0.6666666666666666,
+          "n": 6
+        },
+        "8": {
+          "coverage": 0.6,
+          "n": 5
+        }
+      },
+      "interval_mean_holdout_coverage": 0.6365395021645022,
+      "interval_note": "Nominal 80% range from this model's own calibration residuals (n = 5-12 per horizon); measured holdout coverage 58%-71%. The ranges are too narrow to be read as reliable 80% ranges. This coverage is not independent of the override decision."
+    },
+    "products": {
+      "model": "moving_average_4",
+      "source": "frozen validation selection",
+      "frozen_selection": "moving_average_4",
+      "override": null,
+      "evaluation_note": null,
+      "interval_calibration_n": {
+        "1": 240,
+        "2": 220,
+        "3": 200,
+        "4": 180,
+        "5": 160,
+        "6": 140,
+        "7": 120,
+        "8": 100
+      },
+      "interval_holdout_coverage": {
+        "1": {
+          "coverage": 0.7541666666666667,
+          "n": 240
+        },
+        "2": {
+          "coverage": 0.8,
+          "n": 220
+        },
+        "3": {
+          "coverage": 0.795,
+          "n": 200
+        },
+        "4": {
+          "coverage": 0.7222222222222222,
+          "n": 180
+        },
+        "5": {
+          "coverage": 0.71875,
+          "n": 160
+        },
+        "6": {
+          "coverage": 0.6785714285714286,
+          "n": 140
+        },
+        "7": {
+          "coverage": 0.6333333333333333,
+          "n": 120
+        },
+        "8": {
+          "coverage": 0.57,
+          "n": 100
+        }
+      },
+      "interval_mean_holdout_coverage": 0.7090054563492063,
+      "interval_note": "Nominal 80% range from this model's own calibration residuals (n = 100-240 per horizon); measured holdout coverage 57%-80%."
+    }
+  },
+  "quantiles": {
+    "total": {
+      "1": {
+        "lower": -20051.191000000024,
+        "upper": 40671.69600000009,
+        "n": 12,
+        "unit": "currency"
+      },
+      "2": {
+        "lower": -21968.21000000007,
+        "upper": 40786.9199999999,
+        "n": 11,
+        "unit": "currency"
+      },
+      "3": {
+        "lower": -4715.038999999634,
+        "upper": 42490.42700000013,
+        "n": 10,
+        "unit": "currency"
+      },
+      "4": {
+        "lower": -6632.057999999683,
+        "upper": 44193.93400000037,
+        "n": 9,
+        "unit": "currency"
+      },
+      "5": {
+        "lower": -1072.492000000147,
+        "upper": 45897.4410000006,
+        "n": 8,
+        "unit": "currency"
+      },
+      "6": {
+        "lower": -1318.9960000000665,
+        "upper": 46909.604000002,
+        "n": 7,
+        "unit": "currency"
+      },
+      "7": {
+        "lower": -1565.4999999999857,
+        "upper": 48728.33500000204,
+        "n": 6,
+        "unit": "currency"
+      },
+      "8": {
+        "lower": -1812.0039999999049,
+        "upper": 41450.49800000161,
+        "n": 5,
+        "unit": "currency"
+      }
+    },
+    "products": {
+      "1": {
+        "lower": -0.6723867833311475,
+        "upper": 0.6630305039621214,
+        "n": 240,
+        "unit": "series scale"
+      },
+      "2": {
+        "lower": -0.7547555350925291,
+        "upper": 0.7206534093850768,
+        "n": 220,
+        "unit": "series scale"
+      },
+      "3": {
+        "lower": -0.810545912146026,
+        "upper": 0.7229659382999714,
+        "n": 200,
+        "unit": "series scale"
+      },
+      "4": {
+        "lower": -0.7361440834181553,
+        "upper": 0.6754426668309405,
+        "n": 180,
+        "unit": "series scale"
+      },
+      "5": {
+        "lower": -0.6688857325098364,
+        "upper": 0.7849714082677186,
+        "n": 160,
+        "unit": "series scale"
+      },
+      "6": {
+        "lower": -0.6244293012158602,
+        "upper": 0.7918146826099455,
+        "n": 140,
+        "unit": "series scale"
+      },
+      "7": {
+        "lower": -0.5783628642549733,
+        "upper": 0.8015550409469254,
+        "n": 120,
+        "unit": "series scale"
+      },
+      "8": {
+        "lower": -0.4800090765693645,
+        "upper": 0.7356382285906594,
+        "n": 100,
+        "unit": "series scale"
+      }
+    }
+  },
+  "future_forecast": {
+    "origin_week": "2011-12-05",
+    "series": {
+      "total": {
+        "model": "seasonal_naive",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 296838.64000000927,
+            "lower": 276787.4490000092,
+            "upper": 337510.3360000094,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 202839.14000000252,
+            "lower": 180870.93000000244,
+            "upper": 243626.0600000024,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 82675.24000000044,
+            "lower": 77960.2010000008,
+            "upper": 125165.66700000057,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 0.0,
+            "lower": -6632.057999999683,
+            "upper": 44193.93400000037,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 125737.8399999993,
+            "lower": 124665.34799999915,
+            "upper": 171635.2809999999,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 185317.36000000327,
+            "lower": 183998.3640000032,
+            "upper": 232226.96400000528,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 130796.82999999895,
+            "lower": 129231.32999999897,
+            "upper": 179525.165000001,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 117337.61999999867,
+            "lower": 115525.61599999877,
+            "upper": 158788.11800000028,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "hist_gradient_boosting",
+          "role": "frozen validation selection",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 278071.1631880277
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 309968.42010406184
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 151370.89329842431
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": -8035.54679689214
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 177084.45640855466
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 265936.3787721213
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 194231.15812724447
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 173413.9964207684
+            }
+          ]
+        }
+      },
+      "85123A": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2490.8975,
+            "lower": 1261.8772576654214,
+            "upper": 3702.815894079172,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2490.8975,
+            "lower": 1111.3197723605485,
+            "upper": 3808.1417555366015,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2490.8975,
+            "lower": 1009.3434925970942,
+            "upper": 3812.3687048429347,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2490.8975,
+            "lower": 1145.338660616673,
+            "upper": 3725.5034301746264,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2490.8975,
+            "lower": 1268.2766433099698,
+            "upper": 3925.705224261549,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2490.8975,
+            "lower": 1349.5362030109586,
+            "upper": 3938.2136835277743,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2490.8975,
+            "lower": 1433.738606925963,
+            "upper": 3956.017569416835,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2490.8975,
+            "lower": 1613.514294034254,
+            "upper": 3835.531714096085,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 3534.299999999997
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 2973.2999999999993
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 496.8899999999999
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 2575.8099999999995
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 9263.860000000008
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 1773.1800000000005
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 1530.5
+            }
+          ]
+        }
+      },
+      "85099B": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2714.6175000000003,
+            "lower": 1548.7202823587966,
+            "upper": 3864.2912278965387,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2714.6175000000003,
+            "lower": 1405.8954962685596,
+            "upper": 3964.2075063995007,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2714.6175000000003,
+            "lower": 1309.156763458294,
+            "upper": 3968.2173577148897,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2714.6175000000003,
+            "lower": 1438.1671593371202,
+            "upper": 3885.8135220766408,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2714.6175000000003,
+            "lower": 1554.7909927186354,
+            "upper": 4075.7328632335757,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2714.6175000000003,
+            "lower": 1631.8770253963144,
+            "upper": 4087.5988824846245,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2714.6175000000003,
+            "lower": 1711.7547565040813,
+            "upper": 4104.488352898739,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2714.6175000000003,
+            "lower": 1882.2970845953973,
+            "upper": 3990.190704540445,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 1549.020000000001
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 863.6700000000001
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 342.17999999999995
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 2163.3399999999997
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 544.11
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 1135.2199999999998
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 900.8
+            }
+          ]
+        }
+      },
+      "84879": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2020.3599999999997,
+            "lower": 1291.6317299059745,
+            "upper": 2738.947997488832,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2020.3599999999997,
+            "lower": 1202.3610311520492,
+            "upper": 2801.3993145397517,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2020.3599999999997,
+            "lower": 1141.8957960136224,
+            "upper": 2803.905617812616,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2020.3599999999997,
+            "lower": 1222.5319972073491,
+            "upper": 2752.4002160626537,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2020.3599999999997,
+            "lower": 1295.4261452213464,
+            "upper": 2871.106728819151,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2020.3599999999997,
+            "lower": 1343.607726231778,
+            "upper": 2878.523423490756,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2020.3599999999997,
+            "lower": 1393.5342205474308,
+            "upper": 2889.079958296271,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2020.3599999999997,
+            "lower": 1500.1293936444456,
+            "upper": 2817.639760735402,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 1355.0099999999998
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 1088.3
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 67.6
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 811.1999999999999
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 755.4599999999998
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 257.78999999999996
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 554.3999999999999
+            }
+          ]
+        }
+      },
+      "22086": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 6500.067499999996,
+            "lower": 5771.515343521143,
+            "upper": 7218.481834499135,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 6500.067499999996,
+            "lower": 5682.2662190441215,
+            "upper": 7280.918058781366,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 6500.067499999996,
+            "lower": 5621.815596692915,
+            "upper": 7283.423756349542,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 6500.067499999996,
+            "lower": 5702.432310330732,
+            "upper": 7231.930802041068,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 6500.067499999996,
+            "lower": 5775.3088418305115,
+            "upper": 7350.608626692597,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 6500.067499999996,
+            "lower": 5823.47877867567,
+            "upper": 7358.02352895273,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 6500.067499999996,
+            "lower": 5873.393207128411,
+            "upper": 7368.577512533619,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 6500.067499999996,
+            "lower": 5979.962619098727,
+            "upper": 7297.154580107063,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 4028.259999999997
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 2149.75
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 602.57
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 96.28
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 35.46
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 11.58
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 0.0
+            }
+          ]
+        }
+      },
+      "47566": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 1182.3525,
+            "lower": -81.1951915740849,
+            "upper": 2428.317892975225,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 1182.3525,
+            "lower": -235.98235980233835,
+            "upper": 2536.602723870107,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 1182.3525,
+            "lower": -340.8235076142457,
+            "upper": 2540.948422870372,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 1182.3525,
+            "lower": -201.00776276535885,
+            "upper": 2451.642800794857,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 1182.3525,
+            "lower": -74.61602495002512,
+            "upper": 2657.468958944216,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 1182.3525,
+            "lower": 8.926398145850499,
+            "upper": 2670.3288242959575,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 1182.3525,
+            "lower": 95.49434017558701,
+            "upper": 2688.6328832050604,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 1182.3525,
+            "lower": 280.3205510241038,
+            "upper": 2564.762161540886,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 786.34
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 154.8
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 151.92999999999995
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 586.7100000000002
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 468.89000000000004
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 373.38999999999993
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 760.41
+            }
+          ]
+        }
+      },
+      "21843": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 494.6025,
+            "lower": 265.97108067421124,
+            "upper": 720.0525072505078,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 494.6025,
+            "lower": 237.9632656930778,
+            "upper": 739.6460016188195,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 494.6025,
+            "lower": 218.99288524141457,
+            "upper": 740.4323299363168,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 494.6025,
+            "lower": 244.29171044766449,
+            "upper": 724.2730102168836,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 494.6025,
+            "lower": 267.1615416384236,
+            "upper": 761.5160260411922,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 494.6025,
+            "lower": 282.27804487268696,
+            "upper": 763.8429419837511,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 494.6025,
+            "lower": 297.94199771463695,
+            "upper": 767.1549522827827,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 494.6025,
+            "lower": 331.38519831299465,
+            "upper": 744.7412839299017,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 992.2999999999997
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 536.5499999999998
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 0.05000000000001137
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 153.29999999999998
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 250.06999999999996
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 190.87999999999997
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 325.1699999999999
+            }
+          ]
+        }
+      },
+      "20685": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 515.6975,
+            "lower": 173.97502009303395,
+            "upper": 852.6649028174877,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 515.6975,
+            "lower": 132.11331963055147,
+            "upper": 881.9501931127895,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 515.6975,
+            "lower": 103.75936254172467,
+            "upper": 883.1254736733908,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 515.6975,
+            "lower": 141.57208886650693,
+            "upper": 858.9730504219492,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 515.6975,
+            "lower": 175.75433491390476,
+            "upper": 914.6380844064607,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 515.6975,
+            "lower": 198.34811921514876,
+            "upper": 918.115994348896,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 515.6975,
+            "lower": 221.7601455502936,
+            "upper": 923.0662692332494,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 515.6975,
+            "lower": 271.74581015491276,
+            "upper": 889.5658240365867,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 1295.52
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 734.6099999999999
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 240.26999999999998
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 394.22999999999996
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 202.72000000000003
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 647.6999999999999
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 1003.0499999999998
+            }
+          ]
+        }
+      },
+      "21621": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 239.79500000000002,
+            "lower": -71.84592966193571,
+            "upper": 547.0994381171516,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 239.79500000000002,
+            "lower": -110.02257889177054,
+            "upper": 573.8067682744543,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 239.79500000000002,
+            "lower": -135.88056034257318,
+            "upper": 574.8785898491399,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 239.79500000000002,
+            "lower": -101.39645737072402,
+            "upper": 552.8522846504975,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 239.79500000000002,
+            "lower": -70.22324646857834,
+            "upper": 603.6171712488836,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 239.79500000000002,
+            "lower": -49.61837450891716,
+            "upper": 606.788923625362,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 239.79500000000002,
+            "lower": -28.267289691960855,
+            "upper": 611.3034298628854,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 239.79500000000002,
+            "lower": 17.318177765123664,
+            "upper": 580.7520014405616,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 195.5
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 195.46
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 131.72
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 369.54
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 2856.83
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 201.77999999999997
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 359.64
+            }
+          ]
+        }
+      },
+      "85099F": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 478.8375000000001,
+            "lower": 63.6234032852409,
+            "upper": 888.2738818888154,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 478.8375000000001,
+            "lower": 12.758829935528581,
+            "upper": 923.8573335841903,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 478.8375000000001,
+            "lower": -21.692993907408095,
+            "upper": 925.2853726657554,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 478.8375000000001,
+            "lower": 24.2518236812424,
+            "upper": 895.93867412093,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 478.8375000000001,
+            "lower": 65.785381614323,
+            "upper": 963.5751574180424,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 478.8375000000001,
+            "lower": 93.23823675737117,
+            "upper": 967.8010346140545,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 478.8375000000001,
+            "lower": 121.6853069344806,
+            "upper": 973.8159269183479,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 478.8375000000001,
+            "lower": 182.42100270475692,
+            "upper": 933.1107994837657,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 323.58999999999986
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 437.74
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 48.86
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 1252.8100000000002
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 628.13
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 475.45000000000005
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 175.58
+            }
+          ]
+        }
+      },
+      "79321": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2878.3725000000004,
+            "lower": 2240.8997883087745,
+            "upper": 3506.9747625262903,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2878.3725000000004,
+            "lower": 2162.808081503036,
+            "upper": 3561.605565341175,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2878.3725000000004,
+            "lower": 2109.9146519647984,
+            "upper": 3563.7980148580123,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2878.3725000000004,
+            "lower": 2180.453122811842,
+            "upper": 3518.7424166772826,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2878.3725000000004,
+            "lower": 2244.219045046352,
+            "upper": 3622.5838150252976,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2878.3725000000004,
+            "lower": 2286.3670504974475,
+            "upper": 3629.071748399261,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2878.3725000000004,
+            "lower": 2330.04146114235,
+            "upper": 3638.3063330101563,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2878.3725000000004,
+            "lower": 2423.2881716598135,
+            "upper": 3575.81228916442,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 1973.63
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 2494.07
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 279.06
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 3571.92
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 776.9100000000001
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 689.6999999999999
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 506.90999999999997
+            }
+          ]
+        }
+      },
+      "20725": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 911.605,
+            "lower": 467.83748131048105,
+            "upper": 1349.1974822630314,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 911.605,
+            "lower": 413.4750555566434,
+            "upper": 1387.2279349625042,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 911.605,
+            "lower": 376.65405043645524,
+            "upper": 1388.7541773633084,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 911.605,
+            "lower": 425.7583989142108,
+            "upper": 1357.3893665391881,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 911.605,
+            "lower": 470.14813445580614,
+            "upper": 1429.6770720942914,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 911.605,
+            "lower": 499.48886615100787,
+            "upper": 1434.1935541993032,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 911.605,
+            "lower": 529.892183009382,
+            "upper": 1440.62207831296,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 911.605,
+            "lower": 594.8045480304875,
+            "upper": 1397.1177427364285,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 615.2499999999998
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 342.66999999999996
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 82.83999999999999
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 560.9700000000001
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 994.2599999999999
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 197.19000000000003
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 326.41999999999996
+            }
+          ]
+        }
+      },
+      "20914": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 499.7500000000001,
+            "lower": 276.29233836164326,
+            "upper": 720.0982425342517,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 499.7500000000001,
+            "lower": 248.9183192450245,
+            "upper": 739.2483508079896,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 499.7500000000001,
+            "lower": 230.37722428695065,
+            "upper": 740.016885104921,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 499.7500000000001,
+            "lower": 255.10355603722752,
+            "upper": 724.2232386812607,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 499.7500000000001,
+            "lower": 277.4558600863437,
+            "upper": 760.6234729666523,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 499.7500000000001,
+            "lower": 292.23028818042724,
+            "upper": 762.8977325451763,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 499.7500000000001,
+            "lower": 307.5397775078236,
+            "upper": 766.1347945330965,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 499.7500000000001,
+            "lower": 340.2261835383204,
+            "upper": 744.2283306986768,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 396.44000000000005
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 464.68999999999994
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 70.84000000000002
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 342.15
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 1004.8299999999999
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 143.22
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 117.67000000000002
+            }
+          ]
+        }
+      },
+      "15056N": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 269.51,
+            "lower": -23.922824874478806,
+            "upper": 558.8596995757234,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 269.51,
+            "lower": -59.86894414675993,
+            "upper": 584.0066125355004,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 269.51,
+            "lower": -84.2161329158726,
+            "upper": 585.0158112718877,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 269.51,
+            "lower": -51.74681715793014,
+            "upper": 564.276427125536,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 269.51,
+            "lower": -22.39494946408348,
+            "upper": 612.0752964690337,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 269.51,
+            "lower": -2.9939491145495367,
+            "upper": 615.0617342923389,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 269.51,
+            "lower": 17.109665448436118,
+            "upper": 619.3124734992427,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 269.51,
+            "lower": 60.031731249184304,
+            "upper": 590.5460596792166,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 247.01999999999998
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 132.54000000000002
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 217.48000000000002
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 149.57000000000002
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 299.72999999999996
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 149.87
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 229.48000000000002
+            }
+          ]
+        }
+      },
+      "21931": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 572.0450000000001,
+            "lower": 192.13767466765813,
+            "upper": 946.6659051374966,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 572.0450000000001,
+            "lower": 145.5982527926468,
+            "upper": 979.2236002317682,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 572.0450000000001,
+            "lower": 114.07596019095195,
+            "upper": 980.5302093094463,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 572.0450000000001,
+            "lower": 156.11396636918994,
+            "upper": 953.6789394712785,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 572.0450000000001,
+            "lower": 194.11581416467124,
+            "upper": 1015.5641106819846,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 572.0450000000001,
+            "lower": 219.23427919910011,
+            "upper": 1019.4306501743149,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 572.0450000000001,
+            "lower": 245.26241848925372,
+            "upper": 1024.9340800086254,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 572.0450000000001,
+            "lower": 300.8335946965386,
+            "upper": 987.6902190382505,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 574.29
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 460.2999999999999
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 245.86
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 547.5399999999998
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 1012.93
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 293.5299999999999
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 541.75
+            }
+          ]
+        }
+      },
+      "21232": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 537.0699999999999,
+            "lower": 350.82183503573674,
+            "upper": 720.7265169625862,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 537.0699999999999,
+            "lower": 328.0060551211592,
+            "upper": 736.6878068942017,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 537.0699999999999,
+            "lower": 312.55236744246986,
+            "upper": 737.3283671751342,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 537.0699999999999,
+            "lower": 333.1613449150783,
+            "upper": 724.1646311772979,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 537.0699999999999,
+            "lower": 351.7916106278229,
+            "upper": 754.5036081012369,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 537.0699999999999,
+            "lower": 364.1058454620389,
+            "upper": 756.3991648257048,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 537.0699999999999,
+            "lower": 376.8660447448103,
+            "upper": 759.0972010026941,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 537.0699999999999,
+            "lower": 404.10960890735544,
+            "upper": 740.83853553514,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 489.9
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 510.63000000000005
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 55.03
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 157.59000000000003
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 60.08
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 191.16000000000003
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 179.16
+            }
+          ]
+        }
+      },
+      "21212": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 360.3175,
+            "lower": 99.63521298492435,
+            "upper": 617.3723862922561,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 360.3175,
+            "lower": 67.70110136934977,
+            "upper": 639.7126094234885,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 360.3175,
+            "lower": 46.07134384840771,
+            "upper": 640.6091697683196,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 360.3175,
+            "lower": 74.91670391749938,
+            "upper": 622.184543645227,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 360.3175,
+            "lower": 100.99255961588261,
+            "upper": 664.6484996887536,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 360.3175,
+            "lower": 118.2281812395378,
+            "upper": 667.3016160950062,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 360.3175,
+            "lower": 136.0879971063907,
+            "upper": 671.0779230519202,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 360.3175,
+            "lower": 174.21945796506222,
+            "upper": 645.5221777223569,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 928.7000000000002
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 535.0799999999999
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 595.97
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 162.59999999999997
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 300.96
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 766.07
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 347.23999999999995
+            }
+          ]
+        }
+      },
+      "85099C": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 748.8724999999998,
+            "lower": 403.84601488386505,
+            "upper": 1089.0979327092643,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 748.8724999999998,
+            "lower": 361.57956704734283,
+            "upper": 1118.6663730967523,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 748.8724999999998,
+            "lower": 332.9514646288101,
+            "upper": 1119.8530170686677,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 748.8724999999998,
+            "lower": 371.12979009352586,
+            "upper": 1095.4670717724998,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 748.8724999999998,
+            "lower": 405.64253332984856,
+            "upper": 1151.6703131418562,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 748.8724999999998,
+            "lower": 428.4547696950202,
+            "upper": 1155.1818498815976,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 748.8724999999998,
+            "lower": 452.0931594142467,
+            "upper": 1160.1799873883022,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 748.8724999999998,
+            "lower": 502.562119400201,
+            "upper": 1126.355637116769,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 899.16
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 294.27
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 209.76000000000002
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 812.41
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 170.8
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 132.71999999999997
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 399.42999999999995
+            }
+          ]
+        }
+      },
+      "21754": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 324.96000000000004,
+            "lower": 115.10252480087135,
+            "upper": 531.8973030388224,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 324.96000000000004,
+            "lower": 89.39455624992766,
+            "upper": 549.8818883184293,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 324.96000000000004,
+            "lower": 71.98191822802875,
+            "upper": 550.6036477156032,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 324.96000000000004,
+            "lower": 95.20334421988858,
+            "upper": 535.77124170922,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 324.96000000000004,
+            "lower": 116.19523171319972,
+            "upper": 569.9560676300772,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 324.96000000000004,
+            "lower": 130.07045154053927,
+            "upper": 572.091910140901,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 324.96000000000004,
+            "lower": 144.44816745002998,
+            "upper": 575.1319565231433,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 324.96000000000004,
+            "lower": 175.1451978968759,
+            "upper": 554.5587743054198,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 921.5000000000003
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 529.2200000000001
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 95.11000000000001
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 606.6600000000001
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 436.62
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 302.64
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 513.2500000000001
+            }
+          ]
+        }
+      },
+      "22114": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2471.4399999999996,
+            "lower": 2107.1890716123726,
+            "upper": 2830.622367358604,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2471.4399999999996,
+            "lower": 2062.5675902819808,
+            "upper": 2861.8383241814304,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2471.4399999999996,
+            "lower": 2032.344365881058,
+            "upper": 2863.0910864680422,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2471.4399999999996,
+            "lower": 2072.6499397854113,
+            "upper": 2837.34638686694,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2471.4399999999996,
+            "lower": 2109.0856898142906,
+            "upper": 2896.6812023965103,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2471.4399999999996,
+            "lower": 2133.168995395353,
+            "upper": 2900.3883975617964,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2471.4399999999996,
+            "lower": 2158.124486559803,
+            "upper": 2905.665025025376,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2471.4399999999996,
+            "lower": 2211.405513735018,
+            "upper": 2869.9560243544065,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 3538.37
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 1147.04
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 2007.44
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 9.32
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 3.95
+            }
+          ]
+        }
+      },
+      "22112": {
+        "model": "moving_average_4",
+        "points": [
+          {
+            "week_start": "2011-12-05",
+            "h": 1,
+            "forecast": 2077.7225,
+            "lower": 1704.0269941044326,
+            "upper": 2446.2180233278154,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-12",
+            "h": 2,
+            "forecast": 2077.7225,
+            "lower": 1658.2485327745399,
+            "upper": 2478.2433714266026,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-19",
+            "h": 3,
+            "forecast": 2077.7225,
+            "lower": 1627.24165742547,
+            "upper": 2479.528616294844,
+            "provisional": false
+          },
+          {
+            "week_start": "2011-12-26",
+            "h": 4,
+            "forecast": 2077.7225,
+            "lower": 1668.5923051706145,
+            "upper": 2453.1163883723248,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-02",
+            "h": 5,
+            "forecast": 2077.7225,
+            "lower": 1705.9727892780888,
+            "upper": 2513.989682517911,
+            "provisional": false
+          },
+          {
+            "week_start": "2012-01-09",
+            "h": 6,
+            "forecast": 2077.7225,
+            "lower": 1730.680545281871,
+            "upper": 2517.7930006834335,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-16",
+            "h": 7,
+            "forecast": 2077.7225,
+            "lower": 1756.2831015659476,
+            "upper": 2523.206444591877,
+            "provisional": true
+          },
+          {
+            "week_start": "2012-01-23",
+            "h": 8,
+            "forecast": 2077.7225,
+            "lower": 1810.945640088537,
+            "upper": 2486.5715535571935,
+            "provisional": true
+          }
+        ],
+        "comparison": {
+          "model": "seasonal_naive",
+          "role": "baseline comparison",
+          "points": [
+            {
+              "week_start": "2011-12-05",
+              "h": 1,
+              "forecast": 2507.7899999999995
+            },
+            {
+              "week_start": "2011-12-12",
+              "h": 2,
+              "forecast": 2104.2499999999995
+            },
+            {
+              "week_start": "2011-12-19",
+              "h": 3,
+              "forecast": 1416.76
+            },
+            {
+              "week_start": "2011-12-26",
+              "h": 4,
+              "forecast": 0.0
+            },
+            {
+              "week_start": "2012-01-02",
+              "h": 5,
+              "forecast": 300.56
+            },
+            {
+              "week_start": "2012-01-09",
+              "h": 6,
+              "forecast": 289.37
+            },
+            {
+              "week_start": "2012-01-16",
+              "h": 7,
+              "forecast": 265.90999999999997
+            },
+            {
+              "week_start": "2012-01-23",
+              "h": 8,
+              "forecast": 162.19
+            }
+          ]
+        }
+      }
+    }
+  }
+}

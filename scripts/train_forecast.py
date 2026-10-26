@@ -2,7 +2,8 @@
 
     uv run python scripts/train_forecast.py --stage selection   # validation + calibration
     uv run python scripts/train_forecast.py --stage holdout     # final holdout + future forecast
-    uv run python scripts/train_forecast.py --stage all         # both, one after the other
+    uv run python scripts/train_forecast.py --stage operational # model the app uses (overrides)
+    uv run python scripts/train_forecast.py --stage all         # all three, in order
 
 The holdout stage refuses to run unless the selection stage used the same
 configuration (configs/forecast.toml) and the same data. For the built-in
@@ -30,7 +31,9 @@ def progress(fraction: float, message: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dataset", default=BUILTIN_ID)
-    parser.add_argument("--stage", choices=["selection", "holdout", "all"], required=True)
+    parser.add_argument(
+        "--stage", choices=["selection", "holdout", "operational", "all"], required=True
+    )
     args = parser.parse_args()
 
     started = time.perf_counter()
@@ -55,6 +58,13 @@ def main() -> int:
             (TRACKED / "evaluation.json").write_text(json.dumps(summary, indent=2, default=str))
             (TRACKED / "report.md").write_text(report.markdown(run))
             print(f"Report: {TRACKED / 'report.md'}")
+    if args.stage in ("operational", "all"):
+        current = pipeline.run_operational(args.dataset)
+        for group, g in current["groups"].items():
+            print(f"Operational model for {group}: {g['model']} ({g['source']})")
+        if args.dataset == BUILTIN_ID:
+            TRACKED.mkdir(parents=True, exist_ok=True)
+            (TRACKED / "operational.json").write_text(json.dumps(current, indent=2, default=str))
     print(f"Done in {time.perf_counter() - started:.0f} s")
     return 0
 

@@ -25,7 +25,7 @@ import numpy as np
 from sic.config import PROJECT_ROOT
 from sic.data import storage
 from sic.forecast import config as forecast_config
-from sic.forecast import evaluate, series
+from sic.forecast import evaluate, operational, series
 from sic.forecast.models import Calendar, PooledML, build_models, forecast_at, series_scale
 
 HOLDOUT_NOTE = (
@@ -320,9 +320,27 @@ def run_holdout(dataset_id: str, progress: Progress | None = None) -> dict:
     return result
 
 
+def run_operational(dataset_id: str) -> dict:
+    """Decide the model the app uses (frozen selection unless overridden); writes
+    operational.json and leaves evaluation.json untouched."""
+    evaluation = load_evaluation(dataset_id)
+    if evaluation is None:
+        raise RuntimeError("Run the holdout stage first.")
+    data = load_data(dataset_id, forecast_config.load())
+    if fingerprint(data) != evaluation["data_fingerprint"]:
+        raise RuntimeError("The data changed since evaluation; retrain first.")
+    return operational.write(dataset_id, data, evaluation, forecast_dir(dataset_id))
+
+
 def run_all(dataset_id: str, progress: Progress | None = None) -> dict:
     run_selection(dataset_id, progress)
-    return run_holdout(dataset_id, progress)
+    run_holdout(dataset_id, progress)
+    return run_operational(dataset_id)
+
+
+def load_operational(dataset_id: str) -> dict | None:
+    path = forecast_dir(dataset_id) / "operational.json"
+    return json.loads(path.read_text()) if path.is_file() else None
 
 
 def load_evaluation(dataset_id: str) -> dict | None:
@@ -331,9 +349,13 @@ def load_evaluation(dataset_id: str) -> dict | None:
 
 
 def fresh_forecast(dataset_id: str, series_id: str, horizon: int) -> dict:
-    """Forecast one eligible series now, with the evaluated (selected) model."""
+    """Forecast one eligible series now, with the dataset's operational model.
+
+    That is the frozen validation selection unless a documented override applies
+    (built-in data only); intervals come from that model's own calibration."""
     evaluation = load_evaluation(dataset_id)
-    if evaluation is None:
+    current = load_operational(dataset_id)
+    if evaluation is None or current is None:
         raise LookupError("No evaluated model exists for this dataset; train it first.")
     supported = [int(h) for h, v in evaluation["horizons"].items() if v["supported"]]
     if horizon < 1 or horizon > max(supported):
@@ -349,20 +371,19 @@ def fresh_forecast(dataset_id: str, series_id: str, horizon: int) -> dict:
         raise RuntimeError("The data changed since the model was evaluated; retrain first.")
     saved = joblib.load(forecast_dir(dataset_id) / "model.joblib")
     group = evaluate.group_of(series_id)
-    name = saved["decision"][group]["selected"]
+    name = current["groups"][group]["model"]
     origin = len(data.weeks)
     if name in saved["models"]:
         model = saved["models"][name]
         history = {k: np.asarray(v, dtype=float) for k, v in data.adjusted.items()}
         preds = model.predict(history, origin, horizon)[series_id]
     else:
-        calendar = Calendar(data.weeks, evaluation["calendar"])
+        future_weeks = [data.weeks[-1] + timedelta(days=7 * i) for i in range(1, horizon + 1)]
+        calendar = Calendar(data.weeks + future_weeks, evaluation["calendar"])
         preds = forecast_at(build_models(cfg, calendar)[name], data.adjusted, origin, horizon)[
             series_id
         ]
-    quantiles = {
-        g: {int(h): q for h, q in v.items()} for g, v in evaluation["calibration_quantiles"].items()
-    }
+    quantiles = {g: {int(h): q for h, q in v.items()} for g, v in current["quantiles"].items()}
     scale = series_scale(data.adjusted[series_id])
     points = []
     for h in range(horizon):
@@ -383,6 +404,8 @@ def fresh_forecast(dataset_id: str, series_id: str, horizon: int) -> dict:
         "series_name": next(s["name"] for s in evaluation["series"] if s["id"] == series_id),
         "target": evaluation["target"]["label"],
         "model": name,
+        "model_source": current["groups"][group]["source"],
+        "interval_note": current["groups"][group]["interval_note"],
         "last_complete_week": data.weeks[-1].isoformat(),
         "points": points,
     }
