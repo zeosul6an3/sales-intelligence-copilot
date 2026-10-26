@@ -1,6 +1,6 @@
 # Project status
 
-_Last updated: 2026-10-26 (end of Milestone 3, with the operational override)._
+_Last updated: 2026-10-26 (Milestone 4 plan proposed; not implemented)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
@@ -276,4 +276,10 @@ The assistant is **not complete** until each of these is implemented **and verif
   - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
-After the user has explored the app and reviewed Milestone 3: **Milestone 4 (assistant and reports)**, under the completion criteria recorded above. The `run_forecast` tool will reuse `pipeline.fresh_forecast` (evaluated series and horizons only).
+**Milestone 4 plan written; awaiting approval:** [docs/milestone4_plan.md](docs/milestone4_plan.md). It covers tools, agent loop, grounding checks, the Assistant tab, HTML/CSV reports, frozen regression/development/held-out evaluation sets, report-consistency tests and a complete-app memory test. Open decisions:
+- whether the user writes 5–10 held-out questions
+- Assistant tab or side panel
+- CSV delivery
+- whether to commit a sample report
+
+Nothing in Milestone 4 has been implemented.
