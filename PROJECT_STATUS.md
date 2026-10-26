@@ -1,6 +1,6 @@
 # Project status
 
-_Last updated: 2026-10-24 (end of Milestone 3)._
+_Last updated: 2026-10-26 (end of Milestone 3, with the operational override)._
 Read this first when resuming work on any computer.
 
 ## Current milestone
@@ -31,6 +31,18 @@ Read this first when resuming work on any computer.
   - Weekly zeros explained: "inferred Christmas closure" vs "business was trading; no recorded sales".
 - **Uploads:** train on their own data with the same rules (minimum 70 complete weeks), month-only calendar, artifacts in the upload's ignored folder.
 - **Write-up:** [docs/forecasting.md](docs/forecasting.md). Full metrics: [evaluation/forecast/uci/report.md](evaluation/forecast/uci/report.md).
+
+### Operational override (2026-10-26, user decision)
+- **What changed:** the built-in **business total** now uses **seasonal naive** as its operational default, recorded in [configs/forecast_overrides.toml](configs/forecast_overrides.toml) as **chosen after reviewing holdout results** (`independent_evaluation = false`).
+- **What did not change:**
+  - The frozen design: `configs/forecast.toml`, whose SHA-256 still matches the selection record (tested).
+  - The frozen validation selection (HistGradientBoosting, kept on record and drawn as a comparison line).
+  - The evaluation history in `evaluation/forecast/uci/`.
+- **The 9.5% holdout WAPE is not an independent evaluation** of this decision.
+- **Seasonal naive's own nominal 80% ranges:** calibrated on its own calibration-window residuals (n = 12 → 5). Holdout coverage was **58–71%**, so they are shown as too narrow, and that coverage is not independent either.
+- **Products:** keep the frozen selection (4-week moving average).
+- **Uploads:** cannot be overridden (enforced and tested); they use their own selection.
+- **Where it shows:** the override is written to `operational.json` (tracked copy: [evaluation/forecast/uci/operational.json](evaluation/forecast/uci/operational.json)). The Forecast page and fresh forecasts use it, with a visible override notice.
 
 ### Results (built-in data)
 | Group | Selected on validation | Validation mean WAPE | Holdout mean WAPE | Best on holdout |
@@ -102,7 +114,8 @@ Read this first when resuming work on any computer.
 ### Milestone 3
 | Check | Result |
 |---|---|
-| `uv run pytest` | **64 passed**. They cover: future-data perturbation for all 6 models; window boundaries; horizon/provisional rules; metrics including n/a; the selection rule (a baseline can win, ties go to the simpler model, the experiment is never selected); calendar; exact/unique/too-late correction matching; the real-data correction touching one week only; closure flags; model save/reload; upload training through the job API; ineligible short uploads |
+| `uv run pytest` (after override) | **72 passed**. New tests cover: the override applies only to built-in data; invalid overrides are rejected; the frozen config SHA is unchanged; seasonal naive's own intervals differ from HGB's; the fresh total forecast equals the same week last year; uploads use their own frozen selection |
+| `uv run pytest` (before override) | **64 passed**. They cover: future-data perturbation for all 6 models; window boundaries; horizon/provisional rules; metrics including n/a; the selection rule (a baseline can win, ties go to the simpler model, the experiment is never selected); calendar; exact/unique/too-late correction matching; the real-data correction touching one week only; closure flags; model save/reload; upload training through the job API; ineligible short uploads |
 | Selection recorded before the holdout | Selection commit `685e1b4` (clean); selection results committed (`d89d3a1`) before any holdout run |
 | Holdout re-run reproducibility | `report.md` identical apart from the run timestamp and commit |
 | Browser: upload → Forecast → Train | Progress bar shown; finished; upload selected Ridge for its total on its own validation; month-only calendar; no page errors; deleted with no leftovers |
@@ -193,24 +206,22 @@ The assistant is **not complete** until each of these is implemented **and verif
 - Validation and grounding checks reduce errors but **do not guarantee correctness**. The reports must say so.
 
 ## Pending decisions (need the user)
-1. **Business-total forecasting model.** The frozen selection (HistGradientBoosting) lost clearly to seasonal naive on the holdout, and its intervals under-cover. Options:
-   - Keep it, with the warnings shown (current state).
-   - Adopt seasonal naive as a separately labelled "v2" chosen after seeing holdout results. No untouched data would remain to test it.
-   - Revise the selection design for future data.
-2. **Code licence:** to be discussed separately.
+1. **Code licence:** to be discussed separately.
 
 ### Decided (Milestone 3)
+- Business total: seasonal naive as the operational default (override chosen after the holdout; documented, not independently evaluated). Products keep the moving average.
 - Picnic basket: Option A (forecasting-only correction); dashboard note approved.
 - Closure weeks: £0, flagged "inferred Christmas closure"; published holiday calendar as inputs only.
 - Scope: total + top 20 products (selected on weeks 1–60); horizons 1–8 (6–8 provisional).
 
 ## Known issues and limitations
 ### Open issues (must stay open until verified fixed)
-- **Business-total forecast (open):**
-  - The selected model's holdout WAPE is 24.6% vs 9.5% for seasonal naive; bias rises to +33% at 8 weeks.
-  - It forecasts −£8,036 for the week of 26 Dec 2011.
-  - Its 80% ranges are too narrow.
-  - **Cause:** with two years of data, validation (Feb–Jun) contains no peak season. See decision 1.
+- **Business-total forecast (open, partly addressed):**
+  - **Now in use:** seasonal naive, by override.
+  - **Not independently tested:** its accuracy and its nominal 80% ranges (holdout coverage 58–71%, too narrow) have no independent test; the 9.5% WAPE was seen before the decision.
+  - **Frozen selection (HGB), on record:** 24.6% WAPE, bias up to +33%, a −£8,036 forecast for the week of 26 Dec 2011.
+  - **Cause:** with two years of data, validation (Feb–Jun) contains no peak season.
+  - **Closes when:** the choice is evaluated on new data the decision never saw.
 - **Flat product forecasts (open):** the selected 4-week moving average repeats one value for 8 weeks and cannot anticipate seasonal turns (e.g. Christmas products in January).
 - **Instruct model argument errors (open):** 81% correct arguments in the 16-question regression test. Seen errors:
   - swapped comparison periods in the main example request
@@ -259,10 +270,10 @@ The assistant is **not complete** until each of these is implemented **and verif
   - `uv run python scripts/download_data.py`
   - `uv run python scripts/prepare_data.py` (the pinned-totals test confirms the result matches)
   - `uv run playwright install chromium` (only needed for screenshots and browser checks)
-  - `uv run python scripts/train_forecast.py --stage selection`, then `--stage holdout`. This regenerates the local model files; the tracked metrics in `evaluation/forecast/uci/` should reproduce. Uploads' models are retrained in the app.
+  - `uv run python scripts/train_forecast.py --stage selection`, then `--stage holdout`, then `--stage operational`. This regenerates the local model files; the tracked metrics in `evaluation/forecast/uci/` should reproduce. Uploads' models are retrained in the app.
 - **Never copied between computers:** uploaded datasets live only on the computer where they were uploaded; re-upload them if needed.
 - **Local Git settings are per clone.** On a new clone, repeat the `git config --local` steps in [docs/setup-macos.md](docs/setup-macos.md).
   - These include `http.postBuffer`: pushing the screenshots failed with `HTTP 400` until it was raised for this repository.
 
 ## Next task
-After the user reviews Milestone 3 and decides on the business-total model (decision 1): **Milestone 4 (assistant and reports)**, under the completion criteria recorded above. The `run_forecast` tool will reuse `pipeline.fresh_forecast` (evaluated series and horizons only).
+After the user has explored the app and reviewed Milestone 3: **Milestone 4 (assistant and reports)**, under the completion criteria recorded above. The `run_forecast` tool will reuse `pipeline.fresh_forecast` (evaluated series and horizons only).

@@ -319,9 +319,44 @@ export type Job = {
   finished_at_utc: string | null
 }
 
+export type OperationalGroup = {
+  model: string
+  source: string
+  frozen_selection: string
+  override: {
+    model: string
+    replaces: string
+    decided_on: string
+    decided_by: string
+    reason: string
+    evidence: string
+  } | null
+  evaluation_note: string | null
+  interval_calibration_n: Record<string, number>
+  interval_holdout_coverage: Record<string, { coverage: number; n: number }>
+  interval_mean_holdout_coverage: number | null
+  interval_note: string
+}
+
+export type Operational = {
+  groups: Record<string, OperationalGroup>
+  future_forecast: {
+    origin_week: string
+    series: Record<
+      string,
+      {
+        model: string
+        points: FuturePoint[]
+        comparison?: { model: string; role: string; points: { week_start: string; forecast: number }[] }
+      }
+    >
+  }
+}
+
 export type ForecastOverview = {
   target: { label: string; description: string }
   eligibility: { eligible: boolean; reason: string | null }
   evaluation: Evaluation | null
+  operational: Operational | null
   job: Job | null
 }

@@ -95,16 +95,48 @@ With only 8–40 training rows per series for this feature, the experiment wasn'
    - Its forecasts are flat: the same value for all 8 weeks. So it cannot anticipate seasonal turns, such as Christmas products after December.
 4. **Error levels.** About 15–25% weekly error for the total and about 40–60% for single products. Weekly product sales are volatile, so treat product forecasts as rough guides.
 
-The app keeps the frozen selection, shows these warnings on the Forecast page, and draws the seasonal-naive forecast beside it. Whether to switch the business-total model is a decision for the project owner. Any switch would have been chosen after seeing holdout results, so it would have to be labelled as such, and no untouched data would remain to test it.
+After reviewing these results, the project owner chose an operational override for the business total (section 7).
 
-## 5. Uploads
+## 5. Operational override (business total, built-in data only)
+
+On 2026-10-26 the project owner chose **seasonal naive** as the **operational default** for the built-in business-total forecast, replacing the frozen validation selection (HistGradientBoosting) **after reviewing the holdout results**.
+
+**How it is recorded:**
+- The override lives in its own file, [configs/forecast_overrides.toml](../configs/forecast_overrides.toml), which states `independent_evaluation = false` and the reason.
+- The frozen design ([configs/forecast.toml](../configs/forecast.toml), unchanged; a test checks that its SHA-256 still matches the recorded selection), the validation selection and the evaluation history in `evaluation/forecast/uci/` (`selection.json`, `evaluation.json`, `report.md`) are **unchanged**.
+- The model the app uses is written separately to `operational.json` by `uv run python scripts/train_forecast.py --stage operational`.
+
+**What the 9.5% means now:** the holdout WAPE of seasonal naive (9.5%) is **not an independent evaluation** of this decision, because the decision was made after seeing it. No untouched data remains to provide one.
+
+**The override model's own ranges:** calibrated on seasonal naive's own calibration-window residuals, not HGB's.
+
+| h | Calibration n | Nominal 80% range around the forecast | Holdout coverage (n) |
+|---:|---:|---|---:|
+| 1 | 12 | −£20,051 to +£40,672 | 58% (12) |
+| 2 | 11 | −£21,968 to +£40,787 | 64% (11) |
+| 3 | 10 | −£4,715 to +£42,490 | 60% (10) |
+| 4 | 9 | −£6,632 to +£44,194 | 67% (9) |
+| 5 | 8 | −£1,072 to +£45,897 | 62% (8) |
+| 6 (provisional) | 7 | −£1,319 to +£46,910 | 71% (7) |
+| 7 (provisional) | 6 | −£1,565 to +£48,728 | 67% (6) |
+| 8 (provisional) | 5 | −£1,812 to +£41,450 | 60% (5) |
+
+- **Too narrow:** measured coverage is 58–71%, below the nominal 80%, on very small samples. The ranges are shown as "nominal 80%" with this warning, not as reliable 80% ranges.
+- **Not independent:** this coverage was also measured on the holdout that influenced the decision.
+- **Skewed upward:** in the summer calibration weeks, actuals mostly exceeded last year's values.
+
+**Unchanged:**
+- **Products:** still use their frozen validation selection, the 4-week moving average.
+- **Uploads:** cannot be overridden (enforced in code and tested). They always use their own validation-based selection.
+
+## 6. Uploads
 - **Same pipeline, own data:** an upload uses the same pipeline and frozen rules on its own data, through the **Train and evaluate** button, which runs as a background job with progress.
 - **Minimum history:** **70 complete weeks** (26 history + 20 validation + 12 calibration + 12 holdout). Shorter uploads are refused with that explanation.
 - **Calendar:** no UK holidays are assumed; month is the only calendar input.
 - **Storage:** models and results are stored in the upload's own folder under `data/uploads/` (ignored by Git) and are deleted with the upload. The built-in model is never applied to uploads.
 - **Complete weeks:** a business that never trades on weekends has its final week counted as partial if the data ends on a Friday.
 
-## 6. Limitations
+## 7. Limitations
 - Two years of data; only 12 holdout weeks; h = 6–8 are provisional.
 - Intervals for the business total are unreliable (see above).
 - Fixed hyperparameters (no tuning), to keep the comparison simple and honest.

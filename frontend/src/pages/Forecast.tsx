@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { getJson, type Evaluation, type ForecastOverview, type Job, type MetricCell, type NA } from '../api'
+import {
+  getJson,
+  type Evaluation,
+  type ForecastOverview,
+  type Job,
+  type MetricCell,
+  type NA,
+  type Operational,
+} from '../api'
 import Chart, { type Tokens } from '../components/Chart'
 import { money, moneyExact, shortDate } from '../format'
 import { useApi } from '../hooks'
@@ -57,7 +65,7 @@ export default function Forecast({ datasetId, currency, onOpenIssue }: Props) {
 
   if (overview.error) return <div className="notice notice-error">{overview.error}</div>
   if (!overview.data) return <p className="muted">Loading…</p>
-  const { evaluation, eligibility, target } = overview.data
+  const { evaluation, operational, eligibility, target } = overview.data
   const running = job && ['queued', 'running'].includes(job.status)
 
   return (
@@ -80,9 +88,10 @@ export default function Forecast({ datasetId, currency, onOpenIssue }: Props) {
           <p className="muted small">No evaluated model yet. Training runs in the background with progress shown here.</p>
         )}
       </section>
-      {evaluation && (
+      {evaluation && operational && (
         <Results
           evaluation={evaluation}
+          op={operational}
           currency={currency}
           seriesId={seriesId}
           setSeriesId={setSeriesId}
@@ -119,6 +128,7 @@ function JobStatus({ job }: { job: Job }) {
 
 type ResultsProps = {
   evaluation: Evaluation
+  op: Operational
   currency: string
   seriesId: string
   setSeriesId: (s: string) => void
@@ -127,21 +137,21 @@ type ResultsProps = {
   onOpenIssue: () => void
 }
 
-function Results({ evaluation: ev, currency, seriesId, setSeriesId, horizon, setHorizon, onOpenIssue }: ResultsProps) {
+function Results({ evaluation: ev, op, currency, seriesId, setSeriesId, horizon, setHorizon, onOpenIssue }: ResultsProps) {
   const group = seriesId === 'total' ? 'total' : 'products'
-  const selected = ev.decision[group]?.selected
+  const g = op.groups[group]
+  const frozen = ev.decision[group]?.selected
   const horizons = Object.entries(ev.horizons)
     .filter(([, v]) => v.supported)
     .map(([h]) => Number(h))
   const provisional = horizons.filter((h) => ev.horizons[h].provisional)
-  const future = ev.future_forecast.series[seriesId]
+  const future = op.future_forecast.series[seriesId]
   const name = ev.series.find((s) => s.id === seriesId)?.name ?? seriesId
+  const comparisonModel = future?.comparison?.model ?? (g.model === 'seasonal_naive' ? frozen : 'seasonal_naive')
 
-  // Warn when the selected model lost to seasonal naive on the holdout.
-  const selHold = meanWape(ev.holdout_metrics[selected]?.[group])
+  // Without an override: warn when the frozen selection lost to seasonal naive on the holdout.
+  const selHold = meanWape(ev.holdout_metrics[frozen]?.[group])
   const snHold = meanWape(ev.holdout_metrics.seasonal_naive?.[group])
-  const coverage = Object.values(ev.holdout_coverage[group] ?? {})
-  const meanCoverage = coverage.length ? coverage.reduce((a, c) => a + c.coverage, 0) / coverage.length : null
 
   return (
     <>
@@ -160,24 +170,29 @@ function Results({ evaluation: ev, currency, seriesId, setSeriesId, horizon, set
           </label>
         </div>
         <p className="small">
-          Model used for {group === 'total' ? 'the business total' : 'products'}: <strong>{label(selected)}</strong>,
-          chosen by the frozen rule (lowest validation WAPE averaged over horizons 1–{Math.max(...horizons)}).
-          {provisional.length > 0 &&
-            ` Horizons ${provisional.join(', ')} are provisional: their calibration samples are small.`}
+          Model used for {group === 'total' ? 'the business total' : 'products'}: <strong>{label(g.model)}</strong> ({g.source}).
+          {!g.override &&
+            ` Chosen by the frozen rule (lowest validation WAPE averaged over horizons 1–${Math.max(...horizons)}).`}
+          {provisional.length > 0 && ` Horizons ${provisional.join(', ')} are provisional: their calibration samples are small.`}
         </p>
-        {selHold !== null && snHold !== null && selHold > snHold && (
+        {g.override && (
+          <div className="notice notice-warning" role="note">
+            <strong>! Operational override, chosen after reviewing holdout results ({g.override.decided_on}).</strong>{' '}
+            {label(g.model)} replaces the frozen validation selection, {label(g.override.replaces)}, which stays on record
+            and is shown as a comparison line. {g.evaluation_note} Its holdout WAPE below is therefore shown for reference
+            only, not as evidence that this choice is accurate.
+          </div>
+        )}
+        {!g.override && selHold !== null && snHold !== null && selHold > snHold && (
           <div className="notice notice-warning">
             ! On the final holdout the selected model was less accurate than seasonal naive ({(selHold * 100).toFixed(1)}%
             vs {(snHold * 100).toFixed(1)}% mean WAPE). The selection is kept because it was fixed before the holdout was
-            evaluated; the seasonal-naive forecast is shown alongside for comparison.
+            evaluated.
           </div>
         )}
-        {meanCoverage !== null && meanCoverage < 0.65 && (
-          <div className="notice notice-warning">
-            ! The 80% ranges for this group covered only {(meanCoverage * 100).toFixed(0)}% of holdout weeks on average.
-            Treat them as too narrow.
-          </div>
-        )}
+        <div className={`notice ${(g.interval_mean_holdout_coverage ?? 1) < 0.75 ? 'notice-warning' : 'notice-info'}`}>
+          {(g.interval_mean_holdout_coverage ?? 1) < 0.75 ? '! ' : 'i '}Ranges: {g.interval_note}
+        </div>
         {ev.corrections
           .filter((c) => c.applied_to.includes(seriesId))
           .map((c) => (
@@ -191,8 +206,8 @@ function Results({ evaluation: ev, currency, seriesId, setSeriesId, horizon, set
               </button>
             </div>
           ))}
-        {future && <FutureChart ev={ev} seriesId={seriesId} currency={currency} name={name} />}
-        {future && <FutureTable ev={ev} seriesId={seriesId} currency={currency} />}
+        {future && <FutureChart ev={ev} op={op} seriesId={seriesId} currency={currency} name={name} />}
+        {future && <FutureTable op={op} seriesId={seriesId} currency={currency} />}
       </section>
 
       <section className="card">
@@ -214,18 +229,30 @@ function Results({ evaluation: ev, currency, seriesId, setSeriesId, horizon, set
           Forecasts made {horizon} week{horizon > 1 ? 's' : ''} before each holdout week, using only earlier data.
           These are past tests, not future forecasts. {ev.holdout_note}
         </p>
-        <BacktestChart ev={ev} seriesId={seriesId} horizon={horizon} currency={currency} selected={selected} />
+        <BacktestChart
+          ev={ev}
+          seriesId={seriesId}
+          horizon={horizon}
+          currency={currency}
+          model={g.model}
+          comparison={comparisonModel}
+        />
       </section>
 
-      <MetricsCard ev={ev} group={group} />
-      {group === 'products' && <ProductTable ev={ev} seriesId={seriesId} />}
+      <MetricsCard ev={ev} op={op} group={group} />
+      {group === 'products' && <ProductTable ev={ev} model={g.model} seriesId={seriesId} />}
       <WindowsCard ev={ev} />
     </>
   )
 }
 
-function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesId: string; currency: string; name: string }) {
-  const future = ev.future_forecast.series[seriesId]
+type FutureProps = { ev: Evaluation; op: Operational; seriesId: string; currency: string; name: string }
+
+function FutureChart({ ev, op, seriesId, currency, name }: FutureProps) {
+  const future = op.future_forecast.series[seriesId]
+  const compName = future.comparison
+    ? `${label(future.comparison.model)} (${future.comparison.role})`
+    : ''
   const build = useCallback(
     (t: Tokens) => {
       const histWeeks = ev.history.weeks.slice(-52)
@@ -241,7 +268,7 @@ function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesI
       return {
         animation: false,
         grid: { left: 8, right: 16, top: 36, bottom: 8, containLabel: true },
-        legend: { top: 0, textStyle: { color: t.textSecondary, fontSize: 11 }, data: ['Actual (adjusted)', 'Forecast', 'Seasonal naive (comparison)', '80% range'] },
+        legend: { top: 0, textStyle: { color: t.textSecondary, fontSize: 11 }, data: ['Actual (adjusted)', 'Forecast', ...(compName ? [compName] : []), '80% range'] },
         tooltip: {
           trigger: 'axis',
           backgroundColor: t.surface,
@@ -261,7 +288,7 @@ function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesI
               if (p.lower !== null && p.upper !== null)
                 lines.push(`80% range: ${moneyExact(p.lower, currency)} – ${moneyExact(p.upper, currency)}`)
               const c = future.comparison?.points[i - histWeeks.length]
-              if (c) lines.push(`Seasonal naive: ${moneyExact(c.forecast, currency)}`)
+              if (c) lines.push(`${compName}: ${moneyExact(c.forecast, currency)}`)
               if (p.provisional) lines.push('<span style="opacity:.75">Provisional horizon</span>')
             }
             return lines.join('<br/>')
@@ -294,7 +321,7 @@ function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesI
           ...(future.comparison
             ? [
                 {
-                  name: 'Seasonal naive (comparison)',
+                  name: compName,
                   type: 'line',
                   data: [...pad(histWeeks.length - 1), last, ...future.comparison.points.map((p) => p.forecast)],
                   lineStyle: { width: 2, color: t.series3 },
@@ -306,7 +333,7 @@ function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesI
         ],
       }
     },
-    [ev, seriesId, currency, future],
+    [ev, seriesId, currency, future, compName],
   )
   return (
     <>
@@ -318,8 +345,8 @@ function FutureChart({ ev, seriesId, currency, name }: { ev: Evaluation; seriesI
   )
 }
 
-function FutureTable({ ev, seriesId, currency }: { ev: Evaluation; seriesId: string; currency: string }) {
-  const future = ev.future_forecast.series[seriesId]
+function FutureTable({ op, seriesId, currency }: { op: Operational; seriesId: string; currency: string }) {
+  const future = op.future_forecast.series[seriesId]
   return (
     <div className="table-wrap" style={{ marginTop: 8 }}>
       <table>
@@ -327,8 +354,8 @@ function FutureTable({ ev, seriesId, currency }: { ev: Evaluation; seriesId: str
           <tr>
             <th>Week of</th>
             <th className="num">Forecast</th>
-            <th className="num">80% range</th>
-            <th className="num">Seasonal naive</th>
+            <th className="num">Nominal 80% range</th>
+            <th className="num">{future.comparison ? label(future.comparison.model) : 'Comparison'}</th>
             <th>Note</th>
           </tr>
         </thead>
@@ -352,15 +379,17 @@ function FutureTable({ ev, seriesId, currency }: { ev: Evaluation; seriesId: str
   )
 }
 
-function BacktestChart({ ev, seriesId, horizon, currency, selected }: { ev: Evaluation; seriesId: string; horizon: number; currency: string; selected: string }) {
+type BacktestProps = { ev: Evaluation; seriesId: string; horizon: number; currency: string; model: string; comparison: string }
+
+function BacktestChart({ ev, seriesId, horizon, currency, model, comparison }: BacktestProps) {
   const rows = useMemo(
     () => ev.holdout_predictions.filter((r) => r.series === seriesId && r.h === horizon),
     [ev, seriesId, horizon],
   )
   const weeks = [...new Set(rows.map((r) => r.week_start))].sort()
   const pick = (model: string) => weeks.map((w) => rows.find((r) => r.model === model && r.week_start === w))
-  const sel = pick(selected)
-  const sn = selected === 'seasonal_naive' ? [] : pick('seasonal_naive')
+  const sel = pick(model)
+  const sn = comparison === model ? [] : pick(comparison)
   const build = useCallback(
     (t: Tokens) => ({
       animation: false,
@@ -387,21 +416,23 @@ function BacktestChart({ ev, seriesId, horizon, currency, selected }: { ev: Eval
       },
       series: [
         { name: 'Actual (adjusted)', type: 'line', data: sel.map((r) => r?.actual ?? null), lineStyle: { width: 2, color: t.series }, itemStyle: { color: t.series }, symbolSize: 6 },
-        { name: `${label(selected)} (selected)`, type: 'line', data: sel.map((r) => r?.forecast ?? null), lineStyle: { width: 2, color: t.series2 }, itemStyle: { color: t.series2 }, symbolSize: 6 },
+        { name: `${label(model)} (in use)`, type: 'line', data: sel.map((r) => r?.forecast ?? null), lineStyle: { width: 2, color: t.series2 }, itemStyle: { color: t.series2 }, symbolSize: 6 },
         ...(sn.length
-          ? [{ name: 'Seasonal naive', type: 'line', data: sn.map((r) => r?.forecast ?? null), lineStyle: { width: 2, color: t.series3 }, itemStyle: { color: t.series3 }, symbolSize: 6 }]
+          ? [{ name: label(comparison), type: 'line', data: sn.map((r) => r?.forecast ?? null), lineStyle: { width: 2, color: t.series3 }, itemStyle: { color: t.series3 }, symbolSize: 6 }]
           : []),
       ],
     }),
-    [weeks, sel, sn, selected, currency],
+    [weeks, sel, sn, model, comparison, currency],
   )
   if (!rows.length) return <p className="muted small">No holdout forecasts at this horizon.</p>
   return <Chart build={build} height={280} ariaLabel="Holdout backtest: actual versus forecasts; metrics table below" />
 }
 
-function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
+function MetricsCard({ ev, op, group }: { ev: Evaluation; op: Operational; group: string }) {
   const models = [...ev.selection_rule.candidates, ...ev.selection_rule.experiments]
-  const selected = ev.decision[group]?.selected
+  const g = op.groups[group]
+  const selected = g.model
+  const frozen = ev.decision[group]?.selected
   const horizons = Object.keys(ev.holdout_metrics[selected]?.[group] ?? {})
   return (
     <section className="card">
@@ -425,7 +456,8 @@ function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
               <tr key={m} className={m === selected ? 'highlight' : ''}>
                 <td>
                   {label(m)}
-                  {m === selected ? ' ✓ selected' : ''}
+                  {m === frozen ? ' · frozen validation selection' : ''}
+                  {m === selected ? (g.override ? ' · ✓ in use (override)' : ' · ✓ in use') : ''}
                 </td>
                 <td className="num">{pct({ value: meanWape(ev.validation_metrics[m]?.[group]) })}</td>
                 <td className="num">{pct({ value: meanWape(ev.holdout_metrics[m]?.[group]) })}</td>
@@ -434,7 +466,8 @@ function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
           </tbody>
         </table>
       </div>
-      <h3>Selected model on the holdout, by horizon</h3>
+      <h3>Model in use ({label(selected)}) on the holdout, by horizon</h3>
+      {g.override && <p className="small">{g.evaluation_note}</p>}
       <div className="table-wrap">
         <table>
           <thead>
@@ -454,7 +487,7 @@ function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
           <tbody>
             {horizons.map((h) => {
               const m = ev.holdout_metrics[selected][group][h]
-              const cov = ev.holdout_coverage[group]?.[h]
+              const cov = g.interval_holdout_coverage[h]
               const cell = (c: NA, f: (c: NA) => string) => <span title={c.reason ?? ''}>{f(c)}</span>
               return (
                 <tr key={h}>
@@ -470,7 +503,7 @@ function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
                   <td className="num">{cell(m.skill_vs_naive, (c) => pct(c, true))}</td>
                   <td className="num">{cell(m.skill_vs_seasonal_naive, (c) => pct(c, true))}</td>
                   <td className="num">{cov ? `${(cov.coverage * 100).toFixed(0)}% (n=${cov.n})` : 'n/a'}</td>
-                  <td className="num">{ev.calibration_quantiles[group]?.[h]?.n ?? 'n/a'}</td>
+                  <td className="num">{g.interval_calibration_n[h] ?? 'n/a'}</td>
                 </tr>
               )
             })}
@@ -481,8 +514,8 @@ function MetricsCard({ ev, group }: { ev: Evaluation; group: string }) {
   )
 }
 
-function ProductTable({ ev, seriesId }: { ev: Evaluation; seriesId: string }) {
-  const selected = ev.decision.products.selected
+function ProductTable({ ev, model, seriesId }: { ev: Evaluation; model: string; seriesId: string }) {
+  const selected = model
   const models = [selected, 'seasonal_naive', 'naive'].filter((m, i, a) => a.indexOf(m) === i)
   return (
     <section className="card">

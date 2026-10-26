@@ -18,7 +18,7 @@ A local sales analytics application: an interactive dashboard, a forecasting mod
 
 ## Forecasting results (honest summary)
 - **Comparison:** baselines vs Ridge vs HistGradientBoosting, using frozen rules, time-based validation, calibration and a final holdout. See [docs/forecasting.md](docs/forecasting.md).
-- **Business total:** HistGradientBoosting was selected on validation (19.3% WAPE), but on the holdout it lost clearly to **seasonal naive** (24.6% vs 9.5% WAPE). Its 80% ranges were too narrow.
+- **Business total:** HistGradientBoosting was selected on validation (19.3% WAPE), but on the holdout it lost clearly to **seasonal naive** (24.6% vs 9.5% WAPE). After reviewing this, seasonal naive was adopted as the **operational default** for the built-in total. This is a documented override chosen after the holdout, so the 9.5% is not an independent test of it. Its own nominal 80% ranges covered 58–71% of holdout weeks, so they are too narrow.
 - **Top products:** the 4-week moving-average baseline won and held up (≈50% WAPE).
 
 ## Planned
@@ -45,12 +45,13 @@ uv run python scripts/download_data.py      # official UCI file (~45 MB), with c
 uv run python scripts/prepare_data.py       # clean and classify (~7 s)
 uv run python scripts/train_forecast.py --stage selection   # validation + calibration (~20 s)
 uv run python scripts/train_forecast.py --stage holdout     # final holdout + future forecast (~10 s)
+uv run python scripts/train_forecast.py --stage operational # model the app uses (documented overrides)
 uv run sic serve                            # builds the dashboard if needed, opens the browser
 ```
 
 Checks:
 ```bash
-uv run pytest                                   # 64 tests: metrics, rules, isolation, uploads, API, forecasting (incl. leakage)
+uv run pytest                                   # 72 tests: metrics, rules, isolation, uploads, API, forecasting (incl. leakage)
 uv run python scripts/e2e_upload_check.py       # browser test of the upload journey (app must be running)
 ```
 
